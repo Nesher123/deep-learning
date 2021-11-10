@@ -46,5 +46,5 @@ dependencies:
     - atari-py
     - box2d-py
     # There's no conda package for this version yet.
-   - https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.3.0/de_core_news_sm-2.3.0.tar.gz
+    - https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.3.0/de_core_news_sm-2.3.0.tar.gz
 
