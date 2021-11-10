@@ -90,7 +90,7 @@ class RandomImageDataset(Dataset):
         :return: Number of samples in this dataset.
         """
         # ====== YOUR CODE: ======
-        
+        return self.num_samples
         # ========================
 
 
