@@ -31,7 +31,7 @@ class KNNClassifier(object):
         #     y_train.
         #  2. Save the number of classes as n_classes.
         # ====== YOUR CODE: ======
-        
+        pass
         # ========================
 
         self.x_train = x_train
@@ -63,8 +63,7 @@ class KNNClassifier(object):
             #  - Set y_pred[i] to the most common class among them
             #  - Don't use an explicit loop.
             # ====== YOUR CODE: ======
-            
-            # ========================
+            pass  # ========================
 
         return y_pred
 
@@ -89,12 +88,15 @@ def l2_dist(x1: Tensor, x2: Tensor):
     #    combine the three terms efficiently.
     #  - Don't use torch.cdist
 
-    dists = None
     # ====== YOUR CODE: ======
-    
-    # ========================
+    # x1^2 - 2(x1 * x2) + x2^2
 
-    return dists
+    x2_2 = torch.sum(torch.pow(x2, 2), dim=1)
+    x1_2 = torch.sum(torch.pow(x1, 2), dim=1)
+    xy = torch.matmul(x1, torch.t(x2))
+
+    return torch.sqrt(torch.unsqueeze(x1_2, dim=-1) + x2_2 - 2 * xy)
+    # ========================
 
 
 def accuracy(y: Tensor, y_pred: Tensor):
@@ -111,7 +113,7 @@ def accuracy(y: Tensor, y_pred: Tensor):
     # TODO: Calculate prediction accuracy. Don't use an explicit loop.
     accuracy = None
     # ====== YOUR CODE: ======
-    
+
     # ========================
 
     return accuracy
@@ -134,15 +136,10 @@ def find_best_k(ds_train: Dataset, k_choices, num_folds):
     for i, k in enumerate(k_choices):
         model = KNNClassifier(k)
 
-        # TODO:
-        #  Train model num_folds times with different train/val data.
-        #  Don't use any third-party libraries.
-        #  You can use your train/validation splitter from part 1 (note that
-        #  then it won't be exactly k-fold CV since it will be a
-        #  random split each iteration), or implement something else.
+        # TODO:  #  Train model num_folds times with different train/val data.  #  Don't use any third-party libraries.  #  You can use your train/validation splitter from part 1 (note that  #  then it won't be exactly k-fold CV since it will be a  #  random split each iteration), or implement something else.
 
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
     best_k_idx = np.argmax([np.mean(acc) for acc in accuracies])
