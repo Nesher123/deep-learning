@@ -31,9 +31,9 @@ class KNNClassifier(object):
         #     y_train.
         #  2. Save the number of classes as n_classes.
         # ====== YOUR CODE: ======
-        pass
+        x_train, y_train = dataloader_utils.flatten(dl_train)
+        n_classes = y_train.unique().shape[0]
         # ========================
-
         self.x_train = x_train
         self.y_train = y_train
         self.n_classes = n_classes
@@ -57,13 +57,22 @@ class KNNClassifier(object):
 
         n_test = x_test.shape[0]
         y_pred = torch.zeros(n_test, dtype=torch.int64)
+
         for i in range(n_test):
             # TODO:
             #  - Find indices of k-nearest neighbors of test sample i
             #  - Set y_pred[i] to the most common class among them
             #  - Don't use an explicit loop.
             # ====== YOUR CODE: ======
-            pass  # ========================
+            distances_of_x_test_i_to_all_other_samples = \
+                dist_matrix[:, i]  # distance vector for x_test[i] to all other samples in self.x_train
+
+            # "torch.topk" returns the k largest elements of the given input tensor along a given dimension.
+            # If dim is not given, the last dimension of the input is chosen.
+            # If largest is False then the k *smallest* elements are returned.
+            knn_values, knn_indices = torch.topk(distances_of_x_test_i_to_all_other_samples, self.k, largest=False)
+            y_pred[i] = torch.bincount(self.y_train[knn_indices]).argmax()
+            # ========================
 
         return y_pred
 
