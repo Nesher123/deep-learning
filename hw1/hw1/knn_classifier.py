@@ -144,10 +144,25 @@ def find_best_k(ds_train: Dataset, k_choices, num_folds):
     for i, k in enumerate(k_choices):
         model = KNNClassifier(k)
 
-        # TODO:  #  Train model num_folds times with different train/val data.  #  Don't use any third-party libraries.  #  You can use your train/validation splitter from part 1 (note that  #  then it won't be exactly k-fold CV since it will be a  #  random split each iteration), or implement something else.
-
+        # TODO:
+        #  Train model num_folds times with different train/val data.
+        #  Don't use any third-party libraries.
+        #  You can use your train/validation splitter from part 1 (note that
+        #  then it won't be exactly k-fold CV since it will be a
+        #  random split each iteration), or implement something else.
         # ====== YOUR CODE: ======
+        fold_accuracies = []
 
+        for _ in range(num_folds):
+            # num_workers=0 was necessary for PyTorch RuntimeError: DataLoader worker (pid(s) {x}) exited unexpectedly
+            dl_train, dl_valid = dataloaders.create_train_validation_loaders(ds_train, validation_ratio=1 / num_folds,
+                                                                             num_workers=0)
+            model.train(dl_train)
+            x_valid, y_valid = dataloader_utils.flatten(dl_valid)  # just like in "train"
+            y_pred = model.predict(x_valid)
+            fold_accuracies.append(accuracy(y_valid, y_pred))
+
+        accuracies.append(fold_accuracies)
         # ========================
 
     best_k_idx = np.argmax([np.mean(acc) for acc in accuracies])
