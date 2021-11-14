@@ -32,7 +32,7 @@ class LinearRegressor(BaseEstimator, RegressorMixin):
 
         y_pred = None
         # ====== YOUR CODE: ======
-        
+        y_pred = np.matmul(self.weights_, X)
         # ========================
 
         return y_pred
@@ -51,7 +51,7 @@ class LinearRegressor(BaseEstimator, RegressorMixin):
 
         w_opt = None
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
         self.weights_ = w_opt
@@ -62,7 +62,7 @@ class LinearRegressor(BaseEstimator, RegressorMixin):
 
 
 def fit_predict_dataframe(
-    model, df: DataFrame, target_name: str, feature_names: List[str] = None,
+        model, df: DataFrame, target_name: str, feature_names: List[str] = None,
 ):
     """
     Calculates model predictions on a dataframe, optionally with only a subset of
@@ -77,7 +77,7 @@ def fit_predict_dataframe(
     """
     # TODO: Implement according to the docstring description.
     # ====== YOUR CODE: ======
-    
+
     # ========================
     return y_pred
 
@@ -100,7 +100,9 @@ class BiasTrickTransformer(BaseEstimator, TransformerMixin):
 
         xb = None
         # ====== YOUR CODE: ======
-        
+        # simply add a '1' at the beginning of each instance in X
+        biases = np.ones(X.shape[0]).reshape(-1, 1)
+        xb = np.hstack((biases, X))
         # ========================
 
         return xb
@@ -117,7 +119,7 @@ class BostonFeaturesTransformer(BaseEstimator, TransformerMixin):
         # TODO: Your custom initialization, if needed
         # Add any hyperparameters you need and save them as above
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
     def fit(self, X, y=None):
@@ -139,7 +141,7 @@ class BostonFeaturesTransformer(BaseEstimator, TransformerMixin):
 
         X_transformed = None
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
         return X_transformed
@@ -163,7 +165,13 @@ def top_correlated_features(df: DataFrame, target_feature, n=5):
     # TODO: Calculate correlations with target and sort features by it
 
     # ====== YOUR CODE: ======
-    
+    target_correlations = df.corr(method='pearson').abs().loc[target_feature]
+    indices = np.argsort(target_correlations)
+    top_correlated_features = target_correlations[indices][::-1]
+    top_correlated_features = top_correlated_features[
+                                  [key != target_feature for key in top_correlated_features.keys()]][:n]
+    top_n_corr = top_correlated_features.values
+    top_n_features = top_correlated_features.keys().values
     # ========================
 
     return top_n_features, top_n_corr
@@ -179,7 +187,7 @@ def mse_score(y: np.ndarray, y_pred: np.ndarray):
 
     # TODO: Implement MSE using numpy.
     # ====== YOUR CODE: ======
-    
+    mse = np.square(y - y_pred).mean()
     # ========================
     return mse
 
@@ -194,13 +202,14 @@ def r2_score(y: np.ndarray, y_pred: np.ndarray):
 
     # TODO: Implement R^2 using numpy.
     # ====== YOUR CODE: ======
-    
+    residual = y - y_pred
+    r2 = 1 - np.sum(np.square(residual) / np.sum(np.square(y - (y_pred.mean()))))
     # ========================
     return r2
 
 
 def cv_best_hyperparams(
-    model: BaseEstimator, X, y, k_folds, degree_range, lambda_range
+        model: BaseEstimator, X, y, k_folds, degree_range, lambda_range
 ):
     """
     Cross-validate to find best hyperparameters with k-fold CV.
@@ -227,7 +236,7 @@ def cv_best_hyperparams(
     #  - You can use MSE or R^2 as a score.
 
     # ====== YOUR CODE: ======
-   
+
     # ========================
 
     return best_params
