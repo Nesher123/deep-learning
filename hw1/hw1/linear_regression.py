@@ -32,7 +32,7 @@ class LinearRegressor(BaseEstimator, RegressorMixin):
 
         y_pred = None
         # ====== YOUR CODE: ======
-        y_pred = np.matmul(self.weights_, X)
+        y_pred = np.matmul(X, self.weights_)
         # ========================
 
         return y_pred
@@ -51,7 +51,10 @@ class LinearRegressor(BaseEstimator, RegressorMixin):
 
         w_opt = None
         # ====== YOUR CODE: ======
-
+        mat = np.eye(X.shape[1])
+        mat[0][0] = 0
+        regularization_matrix = self.reg_lambda * X.shape[0] * mat
+        w_opt = np.matmul(np.matmul(np.linalg.inv(np.matmul(X.T, X) + regularization_matrix), X.T), y)
         # ========================
 
         self.weights_ = w_opt
@@ -77,7 +80,13 @@ def fit_predict_dataframe(
     """
     # TODO: Implement according to the docstring description.
     # ====== YOUR CODE: ======
+    if feature_names is None:
+        X = df.drop(columns=target_name)
+    else:
+        X = df[feature_names]
 
+    y = df[target_name]
+    y_pred = model.fit_predict(X, y)
     # ========================
     return y_pred
 
@@ -141,7 +150,7 @@ class BostonFeaturesTransformer(BaseEstimator, TransformerMixin):
 
         X_transformed = None
         # ====== YOUR CODE: ======
-
+        X_transformed = PolynomialFeatures(degree=self.degree).fit_transform(X)
         # ========================
 
         return X_transformed
@@ -202,8 +211,7 @@ def r2_score(y: np.ndarray, y_pred: np.ndarray):
 
     # TODO: Implement R^2 using numpy.
     # ====== YOUR CODE: ======
-    residual = y - y_pred
-    r2 = 1 - np.sum(np.square(residual) / np.sum(np.square(y - (y_pred.mean()))))
+    r2 = 1 - (np.sum(np.square(y - y_pred)) / np.sum(np.square(y - y.mean())))
     # ========================
     return r2
 
