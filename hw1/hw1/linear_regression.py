@@ -244,7 +244,13 @@ def cv_best_hyperparams(
     #  - You can use MSE or R^2 as a score.
 
     # ====== YOUR CODE: ======
-
+    parameters = {'linearregressor__reg_lambda': lambda_range, 'bostonfeaturestransformer__degree': degree_range}
+    clf = sklearn.model_selection.GridSearchCV(estimator=model, param_grid=parameters, cv=k_folds,
+                                               scoring='neg_mean_squared_error'
+                                               # scoring = 'r2'
+                                               )
+    clf.fit(X, y)
+    best_params = clf.best_params_
     # ========================
 
     return best_params
