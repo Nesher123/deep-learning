@@ -60,6 +60,14 @@ class BiasTrick(object):
         #  Add a 1 at the beginning of the given tensor's feature dimension.
         #  Hint: See torch.cat().
         # ====== YOUR CODE: ======
-        
+
+        # shape of samples is shape of tensor excluding the last dimension
+        N = x.shape[:-1]
+        # this is how many 1's we will add
+        ones = torch.ones(N, dtype=x.dtype)
+        # to do the concat, we need the dims to match, so add a dimension at the last position (unsqueeze)
+        ones = ones.unsqueeze(dim=-1)
+        # concat
+        return torch.cat((ones, x), dim=-1)
         
         # ========================

@@ -52,12 +52,21 @@ class SVMHingeLoss(ClassifierLoss):
 
         loss = None
         # ====== YOUR CODE: ======
-        
+        # margin loss matrix for all the scores
+        zero_margin_loss = torch.zeros_like(x_scores)
+        true_classes = x_scores[range(len(y)), y]
+        margin_loss = self.delta + x_scores - true_classes.unsqueeze(dim=1)
+        margin_loss[range(len(y)), y] = 0  # give 0 loss for the true value
+        loss = torch.max(zero_margin_loss, margin_loss).sum(dim=1).mean()
         # ========================
 
         # TODO: Save what you need for gradient calculation in self.grad_ctx
         # ====== YOUR CODE: ======
-        
+        self.grad_ctx.update({
+            'marginal_loss': margin_loss,
+            'X': x,
+            'y': y
+        })
         # ========================
 
         return loss
@@ -75,7 +84,16 @@ class SVMHingeLoss(ClassifierLoss):
 
         grad = None
         # ====== YOUR CODE: ======
-        
+        marginal_loss = self.grad_ctx.get('marginal_loss')
+        X, y = self.grad_ctx.get('X'), self.grad_ctx.get('y')
+        num_samples = X.shape[0]
+
+        G = torch.zeros_like(marginal_loss)
+
+        G[marginal_loss > 0] = 1
+        G[marginal_loss <= 0] = 0
+        G[range(num_samples), y] = -1 * G.sum(dim=1)
+        grad = torch.matmul(X.T, G) / num_samples
         # ========================
 
         return grad
