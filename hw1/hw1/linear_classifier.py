@@ -154,7 +154,15 @@ class LinearClassifier(object):
         #  The output shape should be (n_classes, C, H, W).
 
         # ====== YOUR CODE: ======
+        weights = self.weights
 
+        if has_bias:
+            weights = weights[1:]
+
+        C = img_shape[0]
+        H = img_shape[1]
+        W = img_shape[2]
+        w_images = weights.view((-1, C, H, W))
         # ========================
 
         return w_images

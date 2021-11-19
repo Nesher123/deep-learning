@@ -78,16 +78,68 @@ These are the parameters that supposedly give us the best generalization for the
 # Part 3 answers
 
 part3_q1 = r"""
-
+The selection of Δ > 0 is arbitrary for the SVM loss L(W) because we only care that it is positive.<br>
+By doing so, we require classifications to be at least Δ-different for each classification score.<br>
+W can be of different magnitudes (it is a vector), and by enforcing Δ-difference, we simply scale W, without effecting 
+the final classifications themselves.
 """
 
 part3_q2 = r"""
+1. It seems like the linear model is actually learning the weights per digit, but that some weights are very 
+similar.<br>
+Those weights can be translated to the similarity of matrices for each digit - varying angles and boldness of the 
+typed digit.<br>
+Maybe also the ratio of white and black pixels...<br>
+It also seems like the model fails when the image is very different from other images with the same digit 
+(especially the first and last errors).<br>
+For example, the first mis-classification where 5 is interpreted as 6 occurs probably because the weights for such 
+class is already similar.<br>
+Same for the second error (line 2) where 6 is classified as 4 - even for me it is difficult to classify actually!<br>
+It is worth mentioning that the classifier never failed when given image was 0 or 8<br>
+Also, it never classifies 0, 1, 5, or 8 when it is mis-classifying...<br>
 
+2. This interpretation is different from KNN since KNN basically says "if you're close to coordinate x, then the 
+classification will be similar to observed outcomes at x".<br>
+SVM tries to generalize and learn the **representation** of each class.
 """
 
 part3_q3 = r"""
+1. 
+    Based on the graph of the training set loss, we would say that the learning rate we chose is **good**.<br>
+    When training for the same number of epochs with a **too low** learning rate, our loss would not converge to the 
+    validation set loss, and the total accuracy would be lower.
 
+    Choosing a **too high** learning rate may overshoot minimal points and may also cause the loss to increase between 
+    epochs.<br>
+    <img src="https://miro.medium.com/max/918/1*7WRRrBoUDhLf2AYlzrFRZg.png" width="800" height="400">
+
+2. 
 """
+# 2. In general, the higher the training set accuracy, the higher the overfitting is, and vice versa. In addition,
+# the higher the test set accuracy, the better the generalization and the lower the overfitting is.
+# That is because if we make our model too predictive towards the training set, we lose the ability to generalize
+# and therefore the training set accuracy will be high but the test set accuracy will be low.
+# In our case, based on the graph of the training and test set accuracy, we would say that the model is first of
+# all neither highly overfitted to the training set nor highly underfitted to it, because in the former case
+# we will indicate a high training set accuracy result but low test set accuracy result, and in the latter case
+# the opposite, and we are not indicating either (neither of the graphs is low).
+# Regarding the other options, because we are noticing that the training set's accuracy goes a little bit above
+# the test set accuracy (in the graph), we can conclude that our model is slightly overfitted, since it performs
+# better on the training set than on the test set, which is a result of a small overfitting of the training process.
+# It means that our results on the training set are very good (in this case), but we are not able to generalize
+# **as well** and get high results like these - in the test set (although the results on the test set are still very
+# good as well).
+#
+#
+# 2)The model is slightly overfitted to the training set. There is a constant gap in the accuracy between the training
+# set and the validation set, in favor of the training set, thus the model is overfitted to the training set,
+# howewver the gap is very small and constant(it is not growing), thus it is slightly overfitted.
+#
+#
+# 2. Based out of the accuracy plot, we consider the model to be slightly overfitted to the training set.
+# This is because we are achieving a very high accuracy on training but a slight less accuracy on training.
+# It would be a better balance if we could lower the training accuracy and increase the validation accuracy, meaning we
+# overfit less to training data and generalize the model better.
 
 # ==============
 
@@ -96,7 +148,8 @@ part3_q3 = r"""
 
 part4_q1 = r"""
 To recall, linear regression has four assumptions as follows:<br>
-1. Linear relationship between predictors and the target variable, meaning the pattern must in the form of a straight-line (or a hyperplane in case of multiple linear regression)<br>
+1. Linear relationship between predictors and the target variable, meaning the pattern must in the form of a 
+straight-line (or a hyperplane in case of multiple linear regression)<br>
 2. Homoscedasticity, i.e., constant variance of the residuals<br>
 3. Independent observations. This is actually equivalent to independent residuals<br>
 4. Normality of residuals, i.e., the residuals follow the normal distribution<br>
@@ -108,35 +161,46 @@ This assumption is validated if there is no discerning, nonlinear pattern in the
 If the residual points' pattern is no-hozontal (has a U-shape for example) then the true relationship is nonlinear.  
 
 Assumption 2: Constant variance<br>
-This assumption is validated if the residuals are scattered evenly (about the same distance) with respect to the zero-horizontal line throughout the x-axis in the residual plot.<br>
+This assumption is validated if the residuals are scattered evenly (about the same distance) with respect to the 
+zero-horizontal line throughout the x-axis in the residual plot.<br>
 
 Assumption 3: Independent Observations<br>
-This assumption is validated if there is no discerning pattern between several consecutive residuals in the residual plot.
+This assumption is validated if there is no discerning pattern between several consecutive residuals in the residual 
+plot.
 
-Finally, one other reason this is a good residual plot is, that independent of the value of an independent variable (x-axis), the residual errors are approximately distributed in the same manner.<br>
+Finally, one other reason this is a good residual plot is, that independent of the value of an independent variable 
+(x-axis), the residual errors are approximately distributed in the same manner.<br>
 In other words, we do not see any patterns in the value of the residuals as we move along the x-axis.<br>
 Hence, this satisfies our earlier assumption that regression model residuals are independent and normally distributed.
 
 In conclusion, a good example of a residual plot is: https://miro.medium.com/max/430/1*40E7lY7o39jddXBKQypeTA.png
 
 
-We can clearly see that the final plot after CV is better then the plot for the top-5 features since the dots are closer to y = 0 axis.
+We can clearly see that the final plot after CV is better then the plot for the top-5 features since the dots are closer
+ to y = 0 axis.
 """
 
 part4_q2 = r"""
-1. Adding non-linear features to our data helps us finding a **linear relationship** between the **transformations** of X and Y.<br>
-We can thereby obtain a non-linear model in our original data by combining a linear method with non-linear transformation of our original data.<br>
-The key to understanding what is going on is that we are producing a linear model in a high dimensional space where the data coordinates are given by non-linear transforms of the original input features. This results in a linear surface in the higher dimensional space.<br>
+1. Adding non-linear features to our data helps us finding a **linear relationship** between the **transformations** of 
+X and Y.<br>
+We can thereby obtain a non-linear model in our original data by combining a linear method with non-linear 
+transformation of our original data.<br>
+The key to understanding what is going on is that we are producing a linear model in a high dimensional space where the 
+data coordinates are given by non-linear transforms of the original input features. This results in a linear surface in 
+the higher dimensional space.<br>
 (see https://www.futurelearn.com/info/courses/advanced-machine-learning/0/steps/49532)
 
 So it is still a linear regression model but of x' and y' and not x and y...
 
 
-2. No, we cannot fit any non-linear function of the original features with this approach because the features may be completely uncorrelated in the first place (0 correlation between x & y).predict
+2. No, we cannot fit any non-linear function of the original features with this approach because the features may be 
+completely uncorrelated in the first place (0 correlation between x & y).predict
 
 
-3. If we want to plot a decision boundary for non-linear features, then we may get a non-hyperplane in the **original** dimension because **the linear separation occurs in a higher dimension**.<br/>
-Thus, the decision boundary may be hyperbolic or of any degree actually (N-1 dimensions, to be precise, where N is the dimension in which the linear separation occurs).<br/>
+3. If we want to plot a decision boundary for non-linear features, then we may get a non-hyperplane in the **original** 
+dimension because **the linear separation occurs in a higher dimension**.<br/>
+Thus, the decision boundary may be hyperbolic or of any degree actually (N-1 dimensions, to be precise, where N is the 
+dimension in which the linear separation occurs).<br/>
 (see https://www.fatalerrors.org/images/blog/01da298452fd594ea4b9c1e7e76d2e74.jpg)
 
 For the non-linear features themselves, we WILL get a hyperplane representing the decision boundary (in dimension N).
@@ -145,7 +209,8 @@ For the non-linear features themselves, we WILL get a hyperplane representing th
 # ==============
 part4_q3 = r"""
 1. `np.logspace` simply gives values on a larger scale (orders of magnitude different) compared to `np.linspace`.<br/>
-Since we are using CV, we want to better-tune the hyperparameters, and using np.linspace with lambdas would not have a significant impact on the loss at every iteration and the final decision for hyperparameters.
+Since we are using CV, we want to better-tune the hyperparameters, and using np.linspace with lambdas would not have a 
+significant impact on the loss at every iteration and the final decision for hyperparameters.
 
     For example:<br/>
     `print(np.linspace(0.02, 2.0, num=20))`
