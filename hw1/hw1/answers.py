@@ -78,15 +78,15 @@ These are the parameters that supposedly give us the best generalization for the
 # Part 3 answers
 
 part3_q1 = r"""
-**Your answer:**
+
 """
 
 part3_q2 = r"""
-**Your answer:**
+
 """
 
 part3_q3 = r"""
-**Your answer:**
+
 """
 
 # ==============
@@ -141,7 +141,6 @@ Thus, the decision boundary may be hyperbolic or of any degree actually (N-1 dim
 
 For the non-linear features themselves, we WILL get a hyperplane representing the decision boundary (in dimension N).
 """
-
 
 # ==============
 part4_q3 = r"""

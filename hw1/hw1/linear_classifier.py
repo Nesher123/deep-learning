@@ -77,14 +77,13 @@ class LinearClassifier(object):
         return acc * 100
 
     def train(self,
-        dl_train: DataLoader,
-        dl_valid: DataLoader,
-        loss_fn: ClassifierLoss,
-        learn_rate=0.1,
-        weight_decay=0.001,
-        max_epochs=100,
-    ):
-
+              dl_train: DataLoader,
+              dl_valid: DataLoader,
+              loss_fn: ClassifierLoss,
+              learn_rate=0.1,
+              weight_decay=0.001,
+              max_epochs=100,
+              ):
         Result = namedtuple("Result", "accuracy loss")
         train_res = Result(accuracy=[], loss=[])
         valid_res = Result(accuracy=[], loss=[])
@@ -119,7 +118,7 @@ class LinearClassifier(object):
     def _train_batch(self, data_loader: DataLoader, loss_fn: ClassifierLoss, result: namedtuple, learn_rate=0.1,
                      weight_decay=0.001):
         accuracies, losses = [], []
-        data_loader.num_workers = 0 # TODO: Is this a good fix? It works but not sure
+        data_loader.num_workers = 0  # TODO: Is this a good fix? It works but not sure
         x, y = next(iter(data_loader))
         # get class predictions and save accuracy
         y_pred, scores = self.predict(x)
@@ -155,7 +154,7 @@ class LinearClassifier(object):
         #  The output shape should be (n_classes, C, H, W).
 
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
         return w_images

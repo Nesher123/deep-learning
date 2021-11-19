@@ -37,7 +37,7 @@ class FirstLastSampler(Sampler):
 
 
 def create_train_validation_loaders(
-    dataset: Dataset, validation_ratio, batch_size=100, num_workers=2
+        dataset: Dataset, validation_ratio, batch_size=100, num_workers=2
 ):
     """
     Splits a dataset into a train and validation set, returning a
@@ -70,10 +70,10 @@ def create_train_validation_loaders(
     ds_val_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices=indices[idx:])
 
     dl_train = torch.utils.data.DataLoader(
-    dataset, batch_size=batch_size, num_workers=num_workers, sampler=ds_train_sampler)
+        dataset, batch_size=batch_size, num_workers=num_workers, sampler=ds_train_sampler)
 
     dl_valid = torch.utils.data.DataLoader(
-    dataset, batch_size=batch_size, num_workers=num_workers, sampler=ds_val_sampler)
+        dataset, batch_size=batch_size, num_workers=num_workers, sampler=ds_val_sampler)
 
     # ========================
 

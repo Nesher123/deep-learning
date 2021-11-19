@@ -163,10 +163,10 @@ def create_submission_name(hw_dir, submitter_ids):
 def copytree_ignore_fn(src, names, is_distribution=True):
     def ignore_predicate(name: str) -> bool:
         return (
-            (name.startswith(".") and name != GITKEEP)
-            or name == "__pycache__"
-            or name == "data"
-            or re.match(SUBMISSION_ZIPF_PATTERN, name)
+                (name.startswith(".") and name != GITKEEP)
+                or name == "__pycache__"
+                or name == "data"
+                or re.match(SUBMISSION_ZIPF_PATTERN, name)
         )
 
     # Completely drop results folders when creating a distribution,

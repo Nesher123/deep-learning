@@ -69,5 +69,5 @@ class BiasTrick(object):
         ones = ones.unsqueeze(dim=-1)
         # concat
         return torch.cat((ones, x), dim=-1)
-        
+
         # ========================
