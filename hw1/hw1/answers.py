@@ -113,7 +113,9 @@ part3_q3 = r"""
     epochs.<br>
     <img src="https://miro.medium.com/max/918/1*7WRRrBoUDhLf2AYlzrFRZg.png" width="800" height="400">
 
-2. 
+2. Based on the graph of the training and test set accuracy, we would say that the model is **Slightly overfitted to 
+the training set**.<br>
+
 """
 # 2. In general, the higher the training set accuracy, the higher the overfitting is, and vice versa. In addition,
 # the higher the test set accuracy, the better the generalization and the lower the overfitting is.
