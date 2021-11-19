@@ -95,15 +95,73 @@ part3_q3 = r"""
 # Part 4 answers
 
 part4_q1 = r"""
+To recall, linear regression has four assumptions as follows:<br>
+1. Linear relationship between predictors and the target variable, meaning the pattern must in the form of a straight-line (or a hyperplane in case of multiple linear regression)<br>
+2. Homoscedasticity, i.e., constant variance of the residuals<br>
+3. Independent observations. This is actually equivalent to independent residuals<br>
+4. Normality of residuals, i.e., the residuals follow the normal distribution<br>
 
+We can check the first three assumptions in the above via the residual plot!
+
+Assumption 1: Linear relationship<br>
+This assumption is validated if there is no discerning, nonlinear pattern in the residual plot.<br>
+If the residual points' pattern is no-hozontal (has a U-shape for example) then the true relationship is nonlinear.  
+
+Assumption 2: Constant variance<br>
+This assumption is validated if the residuals are scattered evenly (about the same distance) with respect to the zero-horizontal line throughout the x-axis in the residual plot.<br>
+
+Assumption 3: Independent Observations<br>
+This assumption is validated if there is no discerning pattern between several consecutive residuals in the residual plot.
+
+Finally, one other reason this is a good residual plot is, that independent of the value of an independent variable (x-axis), the residual errors are approximately distributed in the same manner.<br>
+In other words, we do not see any patterns in the value of the residuals as we move along the x-axis.<br>
+Hence, this satisfies our earlier assumption that regression model residuals are independent and normally distributed.
+
+In conclusion, a good example of a residual plot is: https://miro.medium.com/max/430/1*40E7lY7o39jddXBKQypeTA.png
+
+
+We can clearly see that the final plot after CV is better then the plot for the top-5 features since the dots are closer to y = 0 axis.
 """
 
 part4_q2 = r"""
-**Your answer:**
+1. Adding non-linear features to our data helps us finding a **linear relationship** between the **transformations** of X and Y.<br>
+We can thereby obtain a non-linear model in our original data by combining a linear method with non-linear transformation of our original data.<br>
+The key to understanding what is going on is that we are producing a linear model in a high dimensional space where the data coordinates are given by non-linear transforms of the original input features. This results in a linear surface in the higher dimensional space.<br>
+(see https://www.futurelearn.com/info/courses/advanced-machine-learning/0/steps/49532)
+
+So it is still a linear regression model but of x' and y' and not x and y...
+
+
+2. No, we cannot fit any non-linear function of the original features with this approach because the features may be completely uncorrelated in the first place (0 correlation between x & y).predict
+
+
+3. If we want to plot a decision boundary for non-linear features, then we may get a non-hyperplane in the **original** dimension because **the linear separation occurs in a higher dimension**.<br/>
+Thus, the decision boundary may be hyperbolic or of any degree actually (N-1 dimensions, to be precise, where N is the dimension in which the linear separation occurs).<br/>
+(see https://www.fatalerrors.org/images/blog/01da298452fd594ea4b9c1e7e76d2e74.jpg)
+
+For the non-linear features themselves, we WILL get a hyperplane representing the decision boundary (in dimension N).
 """
 
-part4_q3 = r"""
-**Your answer:**
-"""
 
 # ==============
+part4_q3 = r"""
+1. np.logspace simply gives values on a larger scale (orders of magnitude different) compared to np.linspace.<br/>
+Since we are using CV, we want to better-tune the hyperparameters, and using np.linspace with lambdas would not have a significant impact on the loss at every iteration and the final decision for hyperparameters.
+
+For example:<br/>
+print(np.linspace(0.02, 2.0, num=20))<br/>
+>>> [ 0.02        0.12421053  0.22842105  0.33263158  0.43684211  0.54105263<br/>
+  0.64526316  0.74947368  0.85368421  0.95789474  1.06210526  1.16631579<br/>
+  1.27052632  1.37473684  1.47894737  1.58315789  1.68736842  1.79157895<br/>
+  1.89578947  2.        ]
+  
+print(np.logspace(0.02, 2.0, num=20))<br/>
+>>> [   1.04712855    1.33109952    1.69208062    2.15095626    2.73427446<br/>
+    3.47578281    4.41838095    5.61660244    7.13976982    9.07600522<br/>
+   11.53732863   14.66613875   18.64345144   23.69937223   30.12640904<br/>
+   38.29639507   48.68200101   61.88408121   78.6664358   100.        ]
+
+2. K-fold CV is fitting the data **K times** (3 times in our case).<br/>
+Including the hyperparameters - we have 3 degrees and 20 lambdas, which yields 60 different combinations.<br/>
+So overall the model fitted to data |lambda_values| * |degrees| * |folds| = 20 * 3 * 3 = 180 times.
+"""
