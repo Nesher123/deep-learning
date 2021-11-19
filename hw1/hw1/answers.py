@@ -145,21 +145,21 @@ For the non-linear features themselves, we WILL get a hyperplane representing th
 
 # ==============
 part4_q3 = r"""
-1. np.logspace simply gives values on a larger scale (orders of magnitude different) compared to np.linspace.<br/>
+1. `np.logspace` simply gives values on a larger scale (orders of magnitude different) compared to `np.linspace`.<br/>
 Since we are using CV, we want to better-tune the hyperparameters, and using np.linspace with lambdas would not have a significant impact on the loss at every iteration and the final decision for hyperparameters.
 
-For example:<br/>
-print(np.linspace(0.02, 2.0, num=20))<br/>
->>> [ 0.02        0.12421053  0.22842105  0.33263158  0.43684211  0.54105263<br/>
-  0.64526316  0.74947368  0.85368421  0.95789474  1.06210526  1.16631579<br/>
-  1.27052632  1.37473684  1.47894737  1.58315789  1.68736842  1.79157895<br/>
-  1.89578947  2.        ]
+    For example:<br/>
+    `print(np.linspace(0.02, 2.0, num=20))`
+    >>>[ 0.02        0.12421053  0.22842105  0.33263158  0.43684211  0.54105263
+      0.64526316  0.74947368  0.85368421  0.95789474  1.06210526  1.16631579
+      1.27052632  1.37473684  1.47894737  1.58315789  1.68736842  1.79157895
+      1.89578947  2.        ]
   
-print(np.logspace(0.02, 2.0, num=20))<br/>
->>> [   1.04712855    1.33109952    1.69208062    2.15095626    2.73427446<br/>
-    3.47578281    4.41838095    5.61660244    7.13976982    9.07600522<br/>
-   11.53732863   14.66613875   18.64345144   23.69937223   30.12640904<br/>
-   38.29639507   48.68200101   61.88408121   78.6664358   100.        ]
+    `print(np.logspace(0.02, 2.0, num=20))`
+    >>>[   1.04712855    1.33109952    1.69208062    2.15095626    2.73427446
+      3.47578281    4.41838095    5.61660244    7.13976982    9.07600522
+      11.53732863   14.66613875   18.64345144   23.69937223   30.12640904
+      38.29639507   48.68200101   61.88408121   78.6664358   100.        ]
 
 2. K-fold CV is fitting the data **K times** (3 times in our case).<br/>
 Including the hyperparameters - we have 3 degrees and 20 lambdas, which yields 60 different combinations.<br/>
