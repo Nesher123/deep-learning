@@ -73,8 +73,6 @@ These are the parameters that supposedly give us the best generalization for the
 """
 
 # ==============
-
-# ==============
 # Part 3 answers
 
 part3_q1 = r"""
@@ -113,37 +111,12 @@ part3_q3 = r"""
     epochs.<br>
     <img src="https://miro.medium.com/max/918/1*7WRRrBoUDhLf2AYlzrFRZg.png" width="800" height="400">
 
-2. Based on the graph of the training and test set accuracy, we would say that the model is **Slightly overfitted to 
-the training set**.<br>
-
+2. Based on the graph of the training and test set accuracy, we would say that the model **slightly overfitted the 
+training set**.<br>
+The results on the training set are very good (in this case) which usually means overfitting.<br>
+We can also notice the training set's accuracy exceeds the validation set accuracy at some moments.<br>
+In general, the higher the training set accuracy, the higher the overfitting, and vice versa.
 """
-# 2. In general, the higher the training set accuracy, the higher the overfitting is, and vice versa. In addition,
-# the higher the test set accuracy, the better the generalization and the lower the overfitting is.
-# That is because if we make our model too predictive towards the training set, we lose the ability to generalize
-# and therefore the training set accuracy will be high but the test set accuracy will be low.
-# In our case, based on the graph of the training and test set accuracy, we would say that the model is first of
-# all neither highly overfitted to the training set nor highly underfitted to it, because in the former case
-# we will indicate a high training set accuracy result but low test set accuracy result, and in the latter case
-# the opposite, and we are not indicating either (neither of the graphs is low).
-# Regarding the other options, because we are noticing that the training set's accuracy goes a little bit above
-# the test set accuracy (in the graph), we can conclude that our model is slightly overfitted, since it performs
-# better on the training set than on the test set, which is a result of a small overfitting of the training process.
-# It means that our results on the training set are very good (in this case), but we are not able to generalize
-# **as well** and get high results like these - in the test set (although the results on the test set are still very
-# good as well).
-#
-#
-# 2)The model is slightly overfitted to the training set. There is a constant gap in the accuracy between the training
-# set and the validation set, in favor of the training set, thus the model is overfitted to the training set,
-# howewver the gap is very small and constant(it is not growing), thus it is slightly overfitted.
-#
-#
-# 2. Based out of the accuracy plot, we consider the model to be slightly overfitted to the training set.
-# This is because we are achieving a very high accuracy on training but a slight less accuracy on training.
-# It would be a better balance if we could lower the training accuracy and increase the validation accuracy, meaning we
-# overfit less to training data and generalize the model better.
-
-# ==============
 
 # ==============
 # Part 4 answers
@@ -175,11 +148,11 @@ Finally, one other reason this is a good residual plot is, that independent of t
 In other words, we do not see any patterns in the value of the residuals as we move along the x-axis.<br>
 Hence, this satisfies our earlier assumption that regression model residuals are independent and normally distributed.
 
-In conclusion, a good example of a residual plot is: https://miro.medium.com/max/430/1*40E7lY7o39jddXBKQypeTA.png
+In conclusion, a good example of a residual plot is:<br>
+<img src="https://miro.medium.com/max/430/1*40E7lY7o39jddXBKQypeTA.png" width="800" height="400">
 
-
-We can clearly see that the final plot after CV is better then the plot for the top-5 features since the dots are closer
- to y = 0 axis.
+We can clearly see that the final plot after CV is better then the plot for the top-5 features since the dots are 
+closer to y = 0 axis.
 """
 
 part4_q2 = r"""
@@ -208,7 +181,6 @@ dimension in which the linear separation occurs).<br/>
 For the non-linear features themselves, we WILL get a hyperplane representing the decision boundary (in dimension N).
 """
 
-# ==============
 part4_q3 = r"""
 1. `np.logspace` simply gives values on a larger scale (orders of magnitude different) compared to `np.linspace`.<br/>
 Since we are using CV, we want to better-tune the hyperparameters, and using np.linspace with lambdas would not have a 
