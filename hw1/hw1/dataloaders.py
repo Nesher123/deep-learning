@@ -19,16 +19,27 @@ class FirstLastSampler(Sampler):
         self.indices = list(self)
 
     def __iter__(self) -> Iterator[int]:
-        indices = []
-        side = True
-        steps = 0
-        i = 0
-        while i < len(self.data_source):
-            indices.append(steps * (1 if side else -1))
-            if side:
-                steps += 1
-            side = not side
-            i += 1
+        n = len(self.data_source)
+
+        """second option with minus indices corresponding to list length (Meital's)"""
+        # indices = []
+        # side = True
+        # steps = 0
+        # i = 0
+        # while i < n:
+        #     indices.append(steps * (1 if side else -1))
+        #     if side:
+        #         steps += 1
+        #     side = not side
+        #     i += 1
+        # return iter(indices)
+
+        a = list(range(int((n + 1) / 2)))
+        b = list(range(int(n / 2), n))[::-1]
+        indices = sum([[x, y] for x, y in zip(a, b)], [])
+
+        if n % 2 == 1:
+            indices.pop()
 
         return iter(indices)
 

@@ -21,8 +21,8 @@ def random_labelled_image(
     # TODO:
     #  Implement according to the docstring description.
     # ====== YOUR CODE: ======
-    image = torch.randint(low, high, shape, dtype=dtype)
-    label = random.randint(0, num_classes - 1)
+    image = torch.randint(low=low, high=high, size=shape, dtype=dtype)
+    label = torch.randint(low=0, high=num_classes, size=(1,), dtype=torch.int).item()
     # ========================
     return image, label
 
@@ -85,11 +85,10 @@ class RandomImageDataset(Dataset):
         # ====== YOUR CODE: ======
         # check if index out of range
         if index >= self.num_samples:
-            raise ValueError('Index out of range.')
-
-        # generate new random image, store, and return
+            raise ValueError
         with torch_temporary_seed(index):
-            return random_labelled_image(shape=self.image_dim, num_classes=self.num_classes)
+            image, label = random_labelled_image(self.image_dim, self.num_classes)
+        return image, label
         # ========================
 
     def __len__(self):
