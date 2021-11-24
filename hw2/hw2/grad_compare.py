@@ -39,6 +39,6 @@ def compare_layer_to_torch(layer: layers.Layer, x, y=None, seed=42):
     for i, (p, dp) in enumerate(layer.params()):
         dp_autograd = p.grad
         diffs.append(torch.norm(dp_autograd - dp))
-        print(f"param#{i+1:02d} diff={diffs[-1]:.3f}")
+        print(f"param#{i + 1:02d} diff={diffs[-1]:.3f}")
 
     return diffs

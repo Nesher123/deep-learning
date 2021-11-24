@@ -82,7 +82,8 @@ class LeakyReLU(Layer):
 
         # TODO: Implement the LeakyReLU operation.
         # ====== YOUR CODE: ======
-
+        # x = x.reshape((x.shape[0], -1))
+        out = torch.max(self.alpha * x, x)
         # ========================
 
         self.grad_cache["x"] = x
@@ -97,7 +98,10 @@ class LeakyReLU(Layer):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-
+        dx = dout.clone()
+        dx[x > 0] = 1
+        dx[x <= 0] = self.alpha
+        dx = dout * dx
         # ========================
 
         return dx
@@ -116,7 +120,7 @@ class ReLU(LeakyReLU):
 
     def __init__(self):
         # ====== YOUR CODE: ======
-
+        super().__init__(alpha=0.0)
         # ========================
 
     def __repr__(self):
@@ -141,7 +145,7 @@ class Sigmoid(Layer):
 
         # TODO: Implement the Sigmoid function.
         #  Save whatever you need into grad_cache.
-        #tip: store the output in self.grad_cache["sigmoid"] 
+        # tip: store the output in self.grad_cache["sigmoid"]
         # ====== YOUR CODE: ======
 
         # ========================
@@ -224,7 +228,7 @@ class Linear(Layer):
         # TODO: Create the weight matrix (self.w) and bias vector (self.b).
         # Initialize the weights to zero-mean gaussian noise with a standart
         # deviation of `wstd`. Init bias to zero.
-        #tip: use torch.randn
+        # tip: use torch.randn
         # ====== YOUR CODE: ======
 
         # ========================
@@ -442,13 +446,13 @@ class MLP(Layer):
     """
 
     def __init__(
-        self,
-        in_features,
-        num_classes,
-        hidden_features=(),
-        activation="relu",
-        dropout=0,
-        **kw,
+            self,
+            in_features,
+            num_classes,
+            hidden_features=(),
+            activation="relu",
+            dropout=0,
+            **kw,
     ):
         super().__init__()
         """
@@ -467,10 +471,10 @@ class MLP(Layer):
             activation_cls = Sigmoid
         else:
             raise ValueError("Unknown activation")
-            
+
         # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
         self.sequence = Sequential(*layers)
