@@ -17,7 +17,6 @@ def test_block_grad(block: layers.Layer, x, y=None, delta=1e-3):
 N = 100
 in_features = 200
 num_classes = 10
-eps = 1e-6
 
 # Test Sequential
 # Let's create a long sequence of layers and see
@@ -45,3 +44,7 @@ test.assertSequenceEqual(z.shape, [N, 1])
 
 # Test backward pass
 test_block_grad(seq, x_test)
+
+# Create an MLP model
+mlp = layers.MLP(in_features, num_classes, hidden_features=[100, 50, 100])
+print(mlp)
