@@ -9,8 +9,11 @@ math (delimited with $$).
 # Part 1 answers
 
 part1_q1 = r"""
-**Your answer:**
+1. The shape of the Jacobian tensor of the output of the layer w.r.t. the input X would be [???, ???].
+<br>
+2. ??? gigabytes of RAM or GPU memory will be required to store the above Jacobian.
 """
+
 
 # ==============
 # Part 2 answers
@@ -20,7 +23,7 @@ def part2_overfit_hp():
     wstd, lr, reg = 0, 0, 0
     # TODO: Tweak the hyperparameters until you overfit the small dataset.
     # ====== YOUR CODE: ======
-    
+
     # ========================
     return dict(wstd=wstd, lr=lr, reg=reg)
 
@@ -31,7 +34,7 @@ def part2_optim_hp():
     # TODO: Tweak the hyperparameters to get the best results you can.
     # You may want to use different learning rates for each optimizer.
     # ====== YOUR CODE: ======
-    
+
     # ========================
     return dict(
         wstd=wstd,
