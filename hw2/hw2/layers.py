@@ -147,7 +147,8 @@ class Sigmoid(Layer):
         #  Save whatever you need into grad_cache.
         # tip: store the output in self.grad_cache["sigmoid"]
         # ====== YOUR CODE: ======
-
+        out = 1.0 / (1 + torch.exp(-x))
+        self.grad_cache['sigmoid'] = out
         # ========================
 
         return out
@@ -160,7 +161,8 @@ class Sigmoid(Layer):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-
+        x = self.grad_cache['sigmoid']
+        dx = x * (1 - x) * dout
         # ========================
 
         return dx
@@ -226,11 +228,12 @@ class Linear(Layer):
         self.out_features = out_features
 
         # TODO: Create the weight matrix (self.w) and bias vector (self.b).
-        # Initialize the weights to zero-mean gaussian noise with a standart
+        # Initialize the weights to zero-mean gaussian noise with a standard
         # deviation of `wstd`. Init bias to zero.
         # tip: use torch.randn
         # ====== YOUR CODE: ======
-
+        self.w = torch.randn(out_features, in_features) * wstd
+        self.b = torch.randn(out_features) * wstd
         # ========================
 
         # These will store the gradients
@@ -250,7 +253,8 @@ class Linear(Layer):
 
         # TODO: Compute the affine transform
         # ====== YOUR CODE: ======
-
+        x = x.reshape((x.shape[0], -1))
+        out = torch.mm(x, self.w.T) + self.b
         # ========================
 
         self.grad_cache["x"] = x
@@ -269,7 +273,9 @@ class Linear(Layer):
         #   - db, the gradient of the loss with respect to b
         #  Note: You should ACCUMULATE gradients in dw and db.
         # ====== YOUR CODE: ======
-
+        dx = torch.mm(dout, self.w)
+        self.dw += torch.mm(dout.T, x)
+        self.db += torch.sum(dout, dim=0)
         # ========================
 
         return dx
@@ -310,7 +316,7 @@ class CrossEntropyLoss(Layer):
         # TODO: Compute the cross entropy loss using the last formula from the
         #  notebook (i.e. directly using the class scores).
         # ====== YOUR CODE: ======
-
+        loss = (-x[range(N), y] + torch.log(torch.sum(torch.exp(x), dim=1))).mean()
         # ========================
 
         self.grad_cache["x"] = x
@@ -329,7 +335,10 @@ class CrossEntropyLoss(Layer):
 
         # TODO: Calculate the gradient w.r.t. the input x.
         # ====== YOUR CODE: ======
-
+        exp_sum = torch.unsqueeze(torch.exp(x).sum(dim=1), dim=1)
+        grad = torch.exp(x) / exp_sum
+        grad[range(N), y] -= 1
+        dx = dout * grad / N
         # ========================
 
         return dx
