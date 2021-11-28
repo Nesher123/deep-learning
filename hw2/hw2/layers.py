@@ -190,7 +190,10 @@ class TanH(Layer):
         # TODO: Implement the tanh function.
         #  Save whatever you need into grad_cache.
         # ====== YOUR CODE: ======
-
+        a = torch.exp(x)
+        b = torch.exp(-x)
+        out = (a - b) / (a + b)
+        self.grad_cache['tanh'] = out
         # ========================
 
         return out
@@ -203,7 +206,8 @@ class TanH(Layer):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-
+        tanh = self.grad_cache['tanh']
+        dx = (1 - torch.square(tanh)) * dout
         # ========================
 
         return dx
@@ -397,7 +401,9 @@ class Sequential(Layer):
         # TODO: Implement the forward pass by passing each layer's output
         #  as the input of the next.
         # ====== YOUR CODE: ======
-
+        # out = [layer.forward(x, **kw) for layer in self.layers]
+        for layer in self.layers:
+            out = layer.forward(x, **kw)
         # ========================
 
         return out
@@ -409,7 +415,9 @@ class Sequential(Layer):
         #  Each layer's input gradient should be the previous layer's output
         #  gradient. Behold the backpropagation algorithm in action!
         # ====== YOUR CODE: ======
-
+        # din = [layer.backward(dout) for layer in reversed(self.layers)]
+        for layer in self.layers:
+            din = layer.backward(dout)
         # ========================
 
         return din
@@ -419,7 +427,9 @@ class Sequential(Layer):
 
         # TODO: Return the parameter tuples from all layers.
         # ====== YOUR CODE: ======
-
+        # params = [layer.params() for layer in self.layers]
+        for layer in self.layers:
+            params += layer.params()
         # ========================
 
         return params
