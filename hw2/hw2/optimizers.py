@@ -25,6 +25,7 @@ class Optimizer(abc.ABC):
         according to the grad.
         """
         returned_params = []
+
         for x in self._params:
             if isinstance(x, Tensor):
                 p = x.data
@@ -72,7 +73,8 @@ class VanillaSGD(Optimizer):
             #  Update the gradient according to regularization and then
             #  update the parameters tensor.
             # ====== YOUR CODE: ======
-
+            dp += self.reg * p
+            p += -self.learn_rate * dp
             # ========================
 
 

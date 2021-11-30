@@ -6,7 +6,7 @@ import torch
 from typing import Any, Callable
 from torch.utils.data import DataLoader
 
-from cs3600.train_results import FitResult, BatchResult, EpochResult
+from hw2.cs3600.train_results import FitResult, BatchResult, EpochResult
 
 
 class Trainer(abc.ABC):
@@ -36,14 +36,14 @@ class Trainer(abc.ABC):
             model.to(self.device)
 
     def fit(
-        self,
-        dl_train: DataLoader,
-        dl_test: DataLoader,
-        num_epochs,
-        checkpoints: str = None,
-        early_stopping: int = None,
-        print_every=1,
-        **kw,
+            self,
+            dl_train: DataLoader,
+            dl_test: DataLoader,
+            num_epochs,
+            checkpoints: str = None,
+            early_stopping: int = None,
+            print_every=1,
+            **kw,
     ) -> FitResult:
         """
         Trains the model for multiple epochs with a given training set,
@@ -69,7 +69,7 @@ class Trainer(abc.ABC):
             verbose = False  # pass this to train/test_epoch.
             if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
-            self._print(f"--- EPOCH {epoch+1}/{num_epochs} ---", verbose)
+            self._print(f"--- EPOCH {epoch + 1}/{num_epochs} ---", verbose)
 
             # TODO: Train & evaluate for one epoch
             #  - Use the train/test_epoch methods.
@@ -138,10 +138,10 @@ class Trainer(abc.ABC):
 
     @staticmethod
     def _foreach_batch(
-        dl: DataLoader,
-        forward_fn: Callable[[Any], BatchResult],
-        verbose=True,
-        max_batches=None,
+            dl: DataLoader,
+            forward_fn: Callable[[Any], BatchResult],
+            verbose=True,
+            max_batches=None,
     ) -> EpochResult:
         """
         Evaluates the given forward-function on batches from the given
@@ -201,13 +201,18 @@ class LayerTrainer(Trainer):
         #    not a tensor) as num_correct.
         # ====== YOUR CODE: ======
         # Forward pass
+        self.model.forward(X)
 
         # Backward pass
+        self.model.backward(y)
 
         # Optimizer step
+        self.optimizer.step()
 
         # Calculate accuracy
-        
+        y_pred = 0
+        loss = self.loss_fn()
+        num_correct = (y == y_pred).sum().item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -220,7 +225,7 @@ class LayerTrainer(Trainer):
         # Forward pass
 
         # Calculate accuracy
-        
+
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -241,7 +246,7 @@ class TorchTrainer(Trainer):
         #  - Backward pass
         #  - Optimize params
         #  - Calculate number of correct predictions
-        #tip: use loss = loss.item() in the end
+        # tip: use loss = loss.item() in the end
         # ====== YOUR CODE: ======
         # Forward pass
 
@@ -250,26 +255,27 @@ class TorchTrainer(Trainer):
         # Optimizer step
 
         # Calculate accuracy
-        
+
         # ========================
 
         return BatchResult(loss, num_correct)
 
     def test_batch(self, batch) -> BatchResult:
         X, y = batch
+
         if self.device:
             X = X.to(self.device)
             y = y.to(self.device)
 
         with torch.no_grad():
-            # TODO: Evaluate the PyTorch model on one batch of data.
-            #  - Forward pass
-            #  - Calculate number of correct predictions
-            # ====== YOUR CODE: ======
-            # Forward pass
+        # TODO: Evaluate the PyTorch model on one batch of data.
+        #  - Forward pass
+        #  - Calculate number of correct predictions
+        # ====== YOUR CODE: ======
+        # Forward pass
 
-            # Calculate accuracy
+        # Calculate accuracy
 
-            # ========================
+        # ========================
 
         return BatchResult(loss, num_correct)

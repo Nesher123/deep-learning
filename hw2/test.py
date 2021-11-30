@@ -1,19 +1,26 @@
-import torch
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 import unittest
-import hw2.layers as layers
-from hw2.grad_compare import compare_layer_to_torch
+import torch
+import torchvision
+import torchvision.transforms as tvtf
+import hw2.optimizers as optimizers
 
+seed = 42
+plt.rcParams.update({'font.size': 12})
 test = unittest.TestCase()
 
+# Test VanillaSGD
+torch.manual_seed(42)
+p = torch.randn(500, 10)
+dp = torch.randn(*p.shape) * 2
+params = [(p, dp)]
 
-def test_block_grad(block: layers.Layer, x, y=None, delta=1e-3):
-    diffs = compare_layer_to_torch(block, x, y)
+vsgd = optimizers.VanillaSGD(params, learn_rate=0.5, reg=0.1)
+vsgd.step()
 
-    # Assert diff values
-    for diff in diffs:
-        test.assertLess(diff, delta)
-
-
-N = 100
-in_features = 200
-num_classes = 10
+expected_p = torch.load('tests/assets/expected_vsgd.pt')
+diff = torch.norm(p - expected_p).item()
+print(f'diff={diff}')
+test.assertLess(diff, 1e-3)
