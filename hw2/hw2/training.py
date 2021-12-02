@@ -6,7 +6,7 @@ import torch
 from typing import Any, Callable
 from torch.utils.data import DataLoader
 
-from hw2.cs3600.train_results import FitResult, BatchResult, EpochResult
+from cs3600.train_results import FitResult, BatchResult, EpochResult
 
 
 class Trainer(abc.ABC):
@@ -67,8 +67,10 @@ class Trainer(abc.ABC):
 
         for epoch in range(num_epochs):
             verbose = False  # pass this to train/test_epoch.
+
             if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
+
             self._print(f"--- EPOCH {epoch + 1}/{num_epochs} ---", verbose)
 
             # TODO: Train & evaluate for one epoch
@@ -80,6 +82,19 @@ class Trainer(abc.ABC):
             #    save the model to the file specified by the checkpoints
             #    argument.
             # ====== YOUR CODE: ======
+            train_epoch_result = self.train_epoch(dl_train, **kw)
+            train_loss.append(
+                torch.stack(train_epoch_result.losses).sum().item() / len(train_epoch_result.losses))  # epoch avg loss
+            train_acc.append(train_epoch_result.accuracy)
+
+            test_epoch_result = self.test_epoch(dl_test, **kw)
+            test_loss.append(
+                torch.stack(test_epoch_result.losses).sum().item() / len(test_epoch_result.losses))
+            test_acc.append(test_epoch_result.accuracy)
+
+            actual_num_epochs = epoch
+
+            # early stopping
 
             # ========================
 
@@ -200,19 +215,21 @@ class LayerTrainer(Trainer):
         #  - Calculate number of correct predictions (make sure it's an int,
         #    not a tensor) as num_correct.
         # ====== YOUR CODE: ======
+        self.optimizer.zero_grad()
+        model = self.model(X)
+
         # Forward pass
-        self.model.forward(X)
+        loss = self.loss_fn.forward(model, y)
 
         # Backward pass
-        self.model.backward(y)
+        self.model.backward(self.loss_fn.backward())
 
         # Optimizer step
         self.optimizer.step()
 
         # Calculate accuracy
-        y_pred = 0
-        loss = self.loss_fn()
-        num_correct = (y == y_pred).sum().item()
+        _, y_pred = torch.max(model.data, 1)
+        num_correct = torch.sum(y_pred == y).item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -222,10 +239,15 @@ class LayerTrainer(Trainer):
 
         # TODO: Evaluate the Layer model on one batch of data.
         # ====== YOUR CODE: ======
+        self.optimizer.zero_grad()
+        model = self.model(X)
+
         # Forward pass
+        loss = self.loss_fn.forward(model, y)
 
         # Calculate accuracy
-
+        _, y_pred = torch.max(model.data, 1)
+        num_correct = torch.sum(y_pred == y).item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -268,14 +290,14 @@ class TorchTrainer(Trainer):
             y = y.to(self.device)
 
         with torch.no_grad():
-        # TODO: Evaluate the PyTorch model on one batch of data.
-        #  - Forward pass
-        #  - Calculate number of correct predictions
-        # ====== YOUR CODE: ======
-        # Forward pass
+            # TODO: Evaluate the PyTorch model on one batch of data.
+            #  - Forward pass
+            #  - Calculate number of correct predictions
+            # ====== YOUR CODE: ======
+            # Forward pass
 
-        # Calculate accuracy
-
-        # ========================
+            # Calculate accuracy
+            pass
+            # ========================
 
         return BatchResult(loss, num_correct)
