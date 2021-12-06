@@ -59,7 +59,9 @@ part2_q1 = r"""
 """
 
 part2_q2 = r"""
-**Your answer:**
+When training a model with the cross-entropy loss function, it **IS** possible for the test loss to increase for a few 
+epochs while the test accuracy also increases!<br>
+
 
 """
 # ==============
