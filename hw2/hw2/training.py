@@ -88,15 +88,23 @@ class Trainer(abc.ABC):
             train_acc.append(train_epoch_result.accuracy)
 
             test_epoch_result = self.test_epoch(dl_test, **kw)
-            test_loss.append(
-                torch.stack(test_epoch_result.losses).sum().item() / len(test_epoch_result.losses))
-            test_acc.append(test_epoch_result.accuracy)
+            current_test_loss = torch.stack(test_epoch_result.losses).sum().item() / len(test_epoch_result.losses)
 
-            actual_num_epochs = epoch
+            # logical AND does not evaluate second condition if 1st fails
+            if (len(test_loss) > 1) and (current_test_loss <= test_loss[-1]):
+                epochs_without_improvement = epochs_without_improvement + 1
+
+            test_loss.append(current_test_loss)
+            current_test_accuracy = test_epoch_result.accuracy
+            test_acc.append(current_test_accuracy)
+
+            if (best_acc is None) or (best_acc < current_test_accuracy):
+                best_acc = current_test_accuracy
 
             # early stopping
-
-            # ========================
+            if epochs_without_improvement == early_stopping:
+                break
+        # ========================
 
         return FitResult(actual_num_epochs, train_loss, train_acc, test_loss, test_acc)
 
