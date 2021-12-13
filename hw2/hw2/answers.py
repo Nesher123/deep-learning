@@ -9,9 +9,10 @@ math (delimited with $$).
 # Part 1 answers
 
 part1_q1 = r"""
-1. The shape of the Jacobian tensor of the output of the layer w.r.t. the input X would be [???, ???].
+1. The shape of the Jacobian tensor of the output of the layer w.r.t. the input X would be 
+[in_features, out_features, N] = [1024, 2048, 128].
 <br>
-2. ??? gigabytes of RAM or GPU memory will be required to store the above Jacobian.
+2. 1GB of RAM/GPU memory will be required to store the above Jacobian.
 """
 
 
