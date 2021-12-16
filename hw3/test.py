@@ -70,3 +70,40 @@ print(embed(text_snippet[0:3]))
 test.assertEqual(text_snippet, unembed(embed(text_snippet)))
 test.assertEqual(embed(text_snippet).dtype, torch.int8)
 
+# Create dataset of sequences
+seq_len = 64
+vocab_len = len(char_to_idx)
+
+# Create labelled samples
+samples, labels = charnn.chars_to_labelled_samples(corpus, char_to_idx, seq_len, device)
+print(f'samples shape: {samples.shape}')
+print(f'labels shape: {labels.shape}')
+
+# Test shapes
+num_samples = (len(corpus) - 1) // seq_len
+test.assertEqual(samples.shape, (num_samples, seq_len, vocab_len))
+test.assertEqual(labels.shape, (num_samples, seq_len))
+
+# Test content
+for _ in range(1000):
+    # random sample
+    i = np.random.randint(num_samples, size=(1,))[0]
+    # Compare to corpus
+    test.assertEqual(unembed(samples[i]), corpus[i * seq_len:(i + 1) * seq_len], msg=f"content mismatch in sample {i}")
+    # Compare to labels
+    sample_text = unembed(samples[i])
+    label_text = str.join('', [idx_to_char[j.item()] for j in labels[i]])
+    test.assertEqual(sample_text[1:], label_text[0:-1], msg=f"label mismatch in sample {i}")
+
+from hw3.charnn import SequenceBatchSampler
+
+sampler = SequenceBatchSampler(dataset=range(32), batch_size=10)
+sampler_idx = list(sampler)
+print('sampler_idx =\n', sampler_idx)
+
+# Test the Sampler
+test.assertEqual(len(sampler_idx), 30)
+batch_idx = np.array(sampler_idx).reshape(-1, 10)
+
+for k in range(10):
+    test.assertEqual(np.diff(batch_idx[:, k], n=2).item(), 0)

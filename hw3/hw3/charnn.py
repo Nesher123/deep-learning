@@ -23,7 +23,7 @@ def char_maps(text: str):
     #  It's best if you also sort the chars before assigning indices, so that
     #  they're in lexical order.
     # ====== YOUR CODE: ======
-    char_to_idx = {k: v for k, v in enumerate(sorted(set(text)))}
+    char_to_idx = {v: k for k, v in enumerate(sorted(set(text)))}
     idx_to_char = {v: k for k, v in char_to_idx.items()}
     # ========================
     return char_to_idx, idx_to_char
@@ -66,8 +66,7 @@ def chars_to_onehot(text: str, char_to_idx: dict) -> Tensor:
     result = torch.zeros([N, D], dtype=torch.int8)
 
     for i, char in enumerate(text):
-        found_value = [key for key, value in char_to_idx.items() if value == char][0]
-        result[i, found_value] = 1
+        result[i, char_to_idx[char]] = 1
     # ========================
     return result
 
@@ -84,12 +83,8 @@ def onehot_to_chars(embedded_text: Tensor, idx_to_char: dict) -> str:
     """
     # TODO: Implement the reverse-embedding.
     # ====== YOUR CODE: ======
-    result = ""
-    idx = embedded_text.nonzero()[:, -1].tolist()
-
-    for i in idx:
-        found_key = [key for key, value in idx_to_char.items() if value == i][0]
-        result = result + found_key
+    indices = embedded_text.nonzero()[:, -1].tolist()
+    result = "".join(idx_to_char[i] for i in indices)
     # ========================
     return result
 
@@ -102,7 +97,7 @@ def chars_to_labelled_samples(text: str, char_to_idx: dict, seq_len: int, device
     seq_len chars represented as indices. The label is constructed such that
     the label of each char is the next char in the original sequence.
     :param text: The char sequence to split.
-    :param char_to_idx: The mapping to create and embedding with.
+    :param char_to_idx: The mapping to create an embedding with.
     :param seq_len: The sequence length of each sample and label.
     :param device: The device on which to create the result tensors.
     :return: A tuple containing two tensors:
@@ -118,7 +113,19 @@ def chars_to_labelled_samples(text: str, char_to_idx: dict, seq_len: int, device
     #  3. Create the labels tensor in a similar way and convert to indices.
     #  Note that no explicit loops are required to implement this function.
     # ====== YOUR CODE: ======
+    # 1
+    embedding = chars_to_onehot(text, char_to_idx)
 
+    # 2
+    is_divisible = len(text) % seq_len == 0
+    N = len(text) // seq_len
+    last = (N * seq_len) - 1 if is_divisible else (N * seq_len)
+    samples = embedding[0:last].view(N, seq_len, embedding.shape[1]).to(device)
+
+    # 3
+    # This is simply another sequence, shifted by one char so that the label of each char is the next char in the corpus
+    indices = embedding[1:last + 1].nonzero()[:, 1]
+    labels = indices.view(N, seq_len).to(device)
     # ========================
     return samples, labels
 
@@ -134,7 +141,7 @@ def hot_softmax(y, dim=0, temperature=1.0):
     """
     # TODO: Implement based on the above.
     # ====== YOUR CODE: ======
-
+    result = torch.softmax(y / temperature, dim=dim)
     # ========================
     return result
 
