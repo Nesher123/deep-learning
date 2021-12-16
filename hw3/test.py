@@ -95,6 +95,15 @@ for _ in range(1000):
     label_text = str.join('', [idx_to_char[j.item()] for j in labels[i]])
     test.assertEqual(sample_text[1:], label_text[0:-1], msg=f"label mismatch in sample {i}")
 
+import re
+import random
+
+i = random.randrange(num_samples - 5)
+for i in range(i, i + 5):
+    test.assertEqual(len(samples[i]), seq_len)
+    s = re.sub(r'\s+', ' ', unembed(samples[i])).strip()
+    print(f'sample [{i}]:\n\t{s}')
+
 from hw3.charnn import SequenceBatchSampler
 
 sampler = SequenceBatchSampler(dataset=range(32), batch_size=10)
@@ -107,3 +116,27 @@ batch_idx = np.array(sampler_idx).reshape(-1, 10)
 
 for k in range(10):
     test.assertEqual(np.diff(batch_idx[:, k], n=2).item(), 0)
+
+import torch.utils.data
+
+# Create DataLoader returning batches of samples.
+batch_size = 32
+
+ds_corpus = torch.utils.data.TensorDataset(samples, labels)
+sampler_corpus = SequenceBatchSampler(ds_corpus, batch_size)
+dl_corpus = torch.utils.data.DataLoader(ds_corpus, batch_size=batch_size, sampler=sampler_corpus, shuffle=False)
+
+print(f'num batches: {len(dl_corpus)}')
+
+x0, y0 = next(iter(dl_corpus))
+print(f'shape of a batch of samples: {x0.shape}')
+print(f'shape of a batch of labels: {y0.shape}')
+
+# Check that sentences in in same index of different batches complete each other.
+k = random.randrange(batch_size)
+for j, (X, y) in enumerate(dl_corpus, ):
+    print(f'=== batch {j}, sample {k} ({X[k].shape}): ===')
+    s = re.sub(r'\s+', ' ', unembed(X[k])).strip()
+    print(f'\t{s}')
+    if j == 4: break
+
