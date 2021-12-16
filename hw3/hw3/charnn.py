@@ -23,7 +23,8 @@ def char_maps(text: str):
     #  It's best if you also sort the chars before assigning indices, so that
     #  they're in lexical order.
     # ====== YOUR CODE: ======
-        
+    char_to_idx = {k: v for k, v in enumerate(sorted(set(text)))}
+    idx_to_char = {v: k for k, v in char_to_idx.items()}
     # ========================
     return char_to_idx, idx_to_char
 
@@ -39,19 +40,20 @@ def remove_chars(text: str, chars_to_remove):
     """
     # TODO: Implement according to the docstring.
     # ====== YOUR CODE: ======
-    
+    text_clean = text.translate({ord(i): None for i in chars_to_remove})
+    n_removed = len(text) - len(text_clean)
     # ========================
     return text_clean, n_removed
 
 
 def chars_to_onehot(text: str, char_to_idx: dict) -> Tensor:
     """
-    Embed a sequence of chars as a a tensor containing the one-hot encoding
+    Embed a sequence of chars as a tensor containing the one-hot encoding
     of each char. A one-hot encoding means that each char is represented as
     a tensor of zeros with a single '1' element at the index in the tensor
     corresponding to the index of that char.
     :param text: The text to embed.
-    :param char_to_idx: Mapping from each char in the sequence to it's
+    :param char_to_idx: Mapping from each char in the sequence to its
     unique index.
     :return: Tensor of shape (N, D) where N is the length of the sequence
     and D is the number of unique chars in the sequence. The dtype of the
@@ -59,7 +61,13 @@ def chars_to_onehot(text: str, char_to_idx: dict) -> Tensor:
     """
     # TODO: Implement the embedding.
     # ====== YOUR CODE: ======
-    
+    N = len(text)
+    D = len(char_to_idx)
+    result = torch.zeros([N, D], dtype=torch.int8)
+
+    for i, char in enumerate(text):
+        found_value = [key for key, value in char_to_idx.items() if value == char][0]
+        result[i, found_value] = 1
     # ========================
     return result
 
@@ -76,7 +84,12 @@ def onehot_to_chars(embedded_text: Tensor, idx_to_char: dict) -> str:
     """
     # TODO: Implement the reverse-embedding.
     # ====== YOUR CODE: ======
-    
+    result = ""
+    idx = embedded_text.nonzero()[:, -1].tolist()
+
+    for i in idx:
+        found_key = [key for key, value in idx_to_char.items() if value == i][0]
+        result = result + found_key
     # ========================
     return result
 
@@ -105,7 +118,7 @@ def chars_to_labelled_samples(text: str, char_to_idx: dict, seq_len: int, device
     #  3. Create the labels tensor in a similar way and convert to indices.
     #  Note that no explicit loops are required to implement this function.
     # ====== YOUR CODE: ======
-    
+
     # ========================
     return samples, labels
 
@@ -121,7 +134,7 @@ def hot_softmax(y, dim=0, temperature=1.0):
     """
     # TODO: Implement based on the above.
     # ====== YOUR CODE: ======
-    
+
     # ========================
     return result
 
@@ -157,7 +170,7 @@ def generate_from_model(model, start_sequence, n_chars, char_maps, T):
     #  necessary for this. Best to disable tracking for speed.
     #  See torch.no_grad().
     # ====== YOUR CODE: ======
-    
+
     # ========================
 
     return out_text
@@ -190,7 +203,7 @@ class SequenceBatchSampler(torch.utils.data.Sampler):
         #  you can drop it.
         idx = None  # idx should be a 1-d list of indices.
         # ====== YOUR CODE: ======
-        
+
         # ========================
         return iter(idx)
 
@@ -237,7 +250,7 @@ class MultilayerGRU(nn.Module):
         #      then call self.register_parameter() on them. Also make
         #      sure to initialize them. See functions in torch.nn.init.
         # ====== YOUR CODE: ======
-        
+
         # ========================
 
     def forward(self, input: Tensor, hidden_state: Tensor = None):
@@ -275,6 +288,6 @@ class MultilayerGRU(nn.Module):
         #  Tip: You can use torch.stack() to combine multiple tensors into a
         #  single tensor in a differentiable manner.
         # ====== YOUR CODE: ======
-        
+
         # ========================
         return layer_output, hidden_state
