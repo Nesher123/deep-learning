@@ -319,7 +319,6 @@ class MultilayerGRU(nn.Module):
 
         # Output (last) layer
         self.W_y = nn.Linear(self.h_dim, self.out_dim)
-
         # ========================
 
     def forward(self, input: Tensor, hidden_state: Tensor = None):
@@ -338,8 +337,8 @@ class MultilayerGRU(nn.Module):
         (B, L, H) as above.
         """
         batch_size, seq_len, _ = input.shape
-
         layer_states = []
+
         for i in range(self.n_layers):
             if hidden_state is None:
                 layer_states.append(
@@ -357,11 +356,11 @@ class MultilayerGRU(nn.Module):
         #  Tip: You can use torch.stack() to combine multiple tensors into a
         #  single tensor in a differentiable manner.
         # ====== YOUR CODE: ======
-
         # for each character in the sequence of this batch
         for i in range(seq_len):
             # extract the one-hot encodings of the character across all sample sequences
             x_t = layer_input[:, i, :]
+
             # for each layer,
             for layer in range(self.n_layers):
                 # get current hidden state, parameters, and dropout for this layer
@@ -386,6 +385,5 @@ class MultilayerGRU(nn.Module):
         # finalize layer output and final hidden state
         layer_output = torch.stack(layer_output, dim=1)
         hidden_state = torch.stack(layer_states, dim=1)
-
         # ========================
         return layer_output, hidden_state
