@@ -233,9 +233,10 @@ class SequenceBatchSampler(torch.utils.data.Sampler):
         idx = []  # idx should be a 1-d list of indices.
         # ====== YOUR CODE: ======
         num_batches = len(self.dataset) // self.batch_size
+
         for batch in range(num_batches):
             for sample in range(self.batch_size):
-                idx.append(sample + (self.batch_size * batch))
+                idx.append(batch + (self.batch_size * sample))
         # ========================
 
         return iter(idx)
@@ -318,7 +319,6 @@ class MultilayerGRU(nn.Module):
 
         # Output (last) layer
         self.W_y = nn.Linear(self.h_dim, self.out_dim)
-
 
         # ========================
 

@@ -139,4 +139,3 @@ for j, (X, y) in enumerate(dl_corpus, ):
     s = re.sub(r'\s+', ' ', unembed(X[k])).strip()
     print(f'\t{s}')
     if j == 4: break
-
