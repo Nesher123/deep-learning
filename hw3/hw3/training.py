@@ -307,12 +307,12 @@ class RNNTrainer(Trainer):
         seq_len = y.shape[1]
 
         with torch.no_grad():
-        # TODO:
-        #  Evaluate the RNN model on one batch of data.
-        #  - Forward pass
-        #  - Loss calculation
-        #  - Calculate number of correct predictions
-        # ====== YOUR CODE: ======
+            # TODO:
+            #  Evaluate the RNN model on one batch of data.
+            #  - Forward pass
+            #  - Loss calculation
+            #  - Calculate number of correct predictions
+            # ====== YOUR CODE: ======
             # forward pass
             model_output, self.hidden_state = self.model(x, self.hidden_state)
             model_output = torch.transpose(model_output, 1, 2)

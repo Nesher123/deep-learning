@@ -1,10 +1,8 @@
-import re
 import torch
 import torch.nn as nn
 import torch.utils.data
 from torch import Tensor
 from typing import Iterator
-
 from torch.utils.data import Dataset
 
 
@@ -198,7 +196,6 @@ def generate_from_model(model, start_sequence, n_chars, char_maps, T):
             out_text += idx_to_char[new_char_index]
             # re-embed the new text to feed back to model to get the next char
             embedded_text = chars_to_onehot(out_text[-1], char_to_idx).to(dtype=torch.float, device=device)
-
     # ========================
 
     return out_text
@@ -232,13 +229,9 @@ class SequenceBatchSampler(torch.utils.data.Sampler):
         #  you can drop it.
         idx = []  # idx should be a 1-d list of indices.
         # ====== YOUR CODE: ======
-        # num_batches = len(self.dataset) // self.batch_size
-        #
-        # for batch in range(num_batches):
-        #     for sample in range(self.batch_size):
-        #         idx.append(batch + (self.batch_size * sample))
         idx = []
-        for i in range(int(len(self.dataset)/self.batch_size)):
+
+        for i in range(int(len(self.dataset) / self.batch_size)):
             for j in range(self.batch_size):
                 idx.append(j + (self.batch_size * i))
         # ========================

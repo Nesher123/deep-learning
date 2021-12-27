@@ -9,32 +9,38 @@ math (delimited with $$).
 # ==============
 # Part 1 answers
 
-
 def part1_rnn_hyperparams():
-    hypers = dict(
-        batch_size=0,
-        seq_len=0,
-        h_dim=0,
-        n_layers=0,
-        dropout=0,
-        learn_rate=0.0,
-        lr_sched_factor=0.0,
-        lr_sched_patience=0,
-    )
+    # hypers = dict(
+    #     batch_size=0,
+    #     seq_len=0,
+    #     h_dim=0,
+    #     n_layers=0,
+    #     dropout=0,
+    #     learn_rate=0.0,
+    #     lr_sched_factor=0.0,
+    #     lr_sched_patience=0,
+    # )
+
     # TODO: Set the hyperparameters to train the model.
     # ====== YOUR CODE: ======
     hypers = dict(
-        batch_size=256, seq_len=64,
-        h_dim=128, n_layers=3, dropout=0.3,
-        learn_rate=0.01, lr_sched_factor=0.5, lr_sched_patience=2
+        batch_size=256,
+        seq_len=64,
+        h_dim=128,
+        n_layers=3,
+        dropout=0.3,
+        learn_rate=0.01,
+        lr_sched_factor=0.5,
+        lr_sched_patience=2
     )
     # ========================
     return hypers
 
 
 def part1_generation_params():
-    start_seq = ""
-    temperature = 0.0001
+    # start_seq = ""
+    # temperature = 0.0001
+
     # TODO: Tweak the parameters to generate a literary masterpiece.
     # ====== YOUR CODE: ======
     start_seq = "Have"
