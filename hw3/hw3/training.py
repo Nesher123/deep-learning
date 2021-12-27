@@ -80,7 +80,7 @@ class Trainer(abc.ABC):
                 self.model.load_state_dict(saved_state["model_state"])
 
         for epoch in range(num_epochs):
-            save_checkpoint = False
+            save_checkpoint = True
             verbose = False  # pass this to train/test_epoch.
             if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
@@ -93,7 +93,31 @@ class Trainer(abc.ABC):
             #  - Implement early stopping. This is a very useful and
             #    simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
+            # training data set
+            training_result = self.train_epoch(dl_train, verbose=verbose, **kw)
+            train_acc.append(training_result.accuracy)
+            train_loss.append(sum(training_result.losses) / len(training_result.losses))
 
+            # test data set
+            testing_result = self.test_epoch(dl_test, verbose=verbose, **kw)
+            current_test_accuracy = testing_result.accuracy
+            test_loss.append(sum(testing_result.losses) / len(testing_result.losses))
+            test_acc.append(current_test_accuracy)
+
+            improvement = len(test_loss) > 1 and test_loss[-1] < test_loss[-2]
+            epochs_without_improvement = epochs_without_improvement + 1 if not improvement else 0
+
+            # keep track of the best accuracy and checkpoints if needed
+            if best_acc is not None:
+                test_accuracy_improved = best_acc < current_test_accuracy
+                best_acc = current_test_accuracy if test_accuracy_improved else best_acc
+
+                if test_accuracy_improved and checkpoints is not None:
+                    save_checkpoint = True
+
+            # regularization using early stopping
+            if early_stopping is not None and early_stopping == epochs_without_improvement:
+                break
             # ========================
 
             # Save model checkpoint if requested
@@ -109,7 +133,7 @@ class Trainer(abc.ABC):
                 )
 
             if post_epoch_fn:
-                post_epoch_fn(epoch, train_result, test_result, verbose)
+                post_epoch_fn(epoch, training_result, testing_result, verbose)
 
         return FitResult(actual_num_epochs, train_loss, train_acc, test_loss, test_acc)
 
@@ -247,6 +271,29 @@ class RNNTrainer(Trainer):
         #  - Calculate number of correct char predictions
         # ====== YOUR CODE: ======
 
+        # forward pass
+        model_output, self.hidden_state = self.model(x, self.hidden_state)
+
+        # to do back propagation through time, need to truncate history of hidden states (to avoid vanishing or
+        # exploding gradients)
+        self.hidden_state = self.hidden_state.detach()
+        # no intermediate buffers will be saved, until the computation gets to some point where one of the inputs of
+        # the operation requires the gradient
+        # https://stackoverflow.com/questions/51748138/pytorch-how-to-set-requires-grad-false
+        self.hidden_state.requires_grad = False
+
+        model_output = torch.transpose(model_output, 1, 2)
+        # compute loss
+        loss = self.loss_fn(model_output, y)
+        # backpropagation
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        # count number of corret predictions
+        predictions = y == torch.argmax(model_output, dim=1)
+        num_correct = torch.sum(predictions)
+
         # ========================
 
         # Note: scaling num_correct by seq_len because each sample has seq_len
@@ -266,7 +313,14 @@ class RNNTrainer(Trainer):
         #  - Loss calculation
         #  - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-
+            # forward pass
+            model_output, self.hidden_state = self.model(x, self.hidden_state)
+            model_output = torch.transpose(model_output, 1, 2)
+            # compute loss
+            loss = self.loss_fn(model_output, y)
+            # count total number of correct predictions
+            predictions = torch.argmax(model_output, dim=1)
+            num_correct = torch.sum(y == predictions)
         # ========================
 
         return BatchResult(loss.item(), num_correct.item() / seq_len)

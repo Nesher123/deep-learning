@@ -232,11 +232,15 @@ class SequenceBatchSampler(torch.utils.data.Sampler):
         #  you can drop it.
         idx = []  # idx should be a 1-d list of indices.
         # ====== YOUR CODE: ======
-        num_batches = len(self.dataset) // self.batch_size
-
-        for batch in range(num_batches):
-            for sample in range(self.batch_size):
-                idx.append(batch + (self.batch_size * sample))
+        # num_batches = len(self.dataset) // self.batch_size
+        #
+        # for batch in range(num_batches):
+        #     for sample in range(self.batch_size):
+        #         idx.append(batch + (self.batch_size * sample))
+        idx = []
+        for i in range(int(len(self.dataset)/self.batch_size)):
+            for j in range(self.batch_size):
+                idx.append(j + (self.batch_size * i))
         # ========================
 
         return iter(idx)
