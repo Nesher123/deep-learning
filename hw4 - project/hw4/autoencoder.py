@@ -19,7 +19,14 @@ class EncoderCNN(nn.Module):
         #  use pooling or only strides, use any activation functions,
         #  use BN or Dropout, etc.
         # ====== YOUR CODE: ======
-
+        modules.append(nn.Conv2d(in_channels, 64, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.Conv2d(64, 128, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.Conv2d(128, 256, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.Conv2d(256, out_channels, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
         # ========================
         self.cnn = nn.Sequential(*modules)
 
@@ -42,7 +49,14 @@ class DecoderCNN(nn.Module):
         #  output should be a batch of images, with same dimensions as the
         #  inputs to the Encoder were.
         # ====== YOUR CODE: ======
-
+        modules.append(nn.ConvTranspose2d(in_channels, 256, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.ConvTranspose2d(256, 128, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.ConvTranspose2d(128, 64, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
+        modules.append(nn.ConvTranspose2d(64, out_channels, kernel_size=3, padding=1))
+        modules.append(nn.ReLU())
         # ========================
         self.cnn = nn.Sequential(*modules)
 
@@ -70,7 +84,9 @@ class VAE(nn.Module):
 
         # TODO: Add more layers as needed for encode() and decode().
         # ====== YOUR CODE: ======
-
+        self.mu = nn.Linear(n_features, z_dim, bias=True)
+        self.log_sigma = nn.Linear(n_features, z_dim, bias=True)
+        self.h = nn.Linear(z_dim, n_features, bias=True)
         # ========================
 
     def _check_features(self, in_size):
@@ -92,12 +108,17 @@ class VAE(nn.Module):
         #  2. Apply the reparametrization trick to obtain z.
         # ====== YOUR CODE: ======
         # Extract image features
+        x_encode = self.features_encoder(x)
+        x_encode = x_encode.view(x.shape[0], -1)
 
         # Transform into mu and log_sigma2
+        mu = self.mu(x_encode)
+        log_sigma2 = self.log_sigma(x_encode)
 
-        # Reparametrization trick: Sample u from an isotropic gaussian and
+        # Re-parametrization trick: Sample u from an isotropic gaussian and
         # use it to create z.
-
+        std = torch.exp(log_sigma2 / 2)
+        z = mu + torch.randn_like(std) * std
         # ========================
 
         return z, mu, log_sigma2
@@ -108,7 +129,8 @@ class VAE(nn.Module):
         #  1. Convert latent z to features h with a linear layer.
         #  2. Apply features decoder.
         # ====== YOUR CODE: ======
-
+        h_hat = self.h(z).view(z.shape[0], *tuple(self.features_shape))
+        x_rec = self.features_decoder(h_hat)
         # ========================
 
         # Scale to [-1, 1] (same dynamic range as original images).
@@ -127,7 +149,9 @@ class VAE(nn.Module):
             #    Instead of sampling from N(psi(z), sigma2 I), we'll just take
             #    the mean, i.e. psi(z).
             # ====== YOUR CODE: ======
-
+            z = torch.randn((n, self.z_dim), device=device)
+            x = self.decode(z)
+            samples = x.cpu()
             # ========================
 
         # Detach and move to CPU for display purposes
@@ -155,12 +179,19 @@ def vae_loss(x, xr, z_mu, z_log_sigma2, x_sigma2):
     """
     loss, data_loss, kldiv_loss = None, None, None
     # TODO:
-    #  Implement the VAE pointwise loss calculation.
+    #  Implement the VAE point-wise loss calculation.
     #  Remember:
     #  1. The covariance matrix of the posterior is diagonal.
     #  2. You need to average over the batch dimension.
     # ====== YOUR CODE: ======
-
+    num_batches = x.shape[0]
+    batch_dim = x.numel()
+    z_dim = z_mu.shape[1]
+    data_loss = torch.norm(x - xr, 2) ** 2 / (batch_dim * x_sigma2)
+    tr_sigma_x = z_log_sigma2.exp().sum() / num_batches
+    log_det_sigma_x = z_log_sigma2.sum() / num_batches
+    kldiv_loss = tr_sigma_x + (torch.norm(z_mu, 2) ** 2 / num_batches) - z_dim - log_det_sigma_x
+    loss = data_loss + kldiv_loss
     # ========================
 
     return loss, data_loss, kldiv_loss
