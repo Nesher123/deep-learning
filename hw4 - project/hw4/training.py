@@ -7,7 +7,7 @@ from typing import Any, Callable
 from pathlib import Path
 from torch.utils.data import DataLoader
 
-from cs236781.train_results import FitResult, BatchResult, EpochResult
+from cs3600.train_results import FitResult, BatchResult, EpochResult
 
 
 class Trainer(abc.ABC):
@@ -35,15 +35,15 @@ class Trainer(abc.ABC):
         model.to(self.device)
 
     def fit(
-        self,
-        dl_train: DataLoader,
-        dl_test: DataLoader,
-        num_epochs,
-        checkpoints: str = None,
-        early_stopping: int = None,
-        print_every=1,
-        post_epoch_fn=None,
-        **kw,
+            self,
+            dl_train: DataLoader,
+            dl_test: DataLoader,
+            num_epochs,
+            checkpoints: str = None,
+            early_stopping: int = None,
+            print_every=1,
+            post_epoch_fn=None,
+            **kw,
     ) -> FitResult:
         """
         Trains the model for multiple epochs with a given training set,
@@ -84,7 +84,7 @@ class Trainer(abc.ABC):
             verbose = False  # pass this to train/test_epoch.
             if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
-            self._print(f"--- EPOCH {epoch+1}/{num_epochs} ---", verbose)
+            self._print(f"--- EPOCH {epoch + 1}/{num_epochs} ---", verbose)
 
             # TODO:
             #  Train & evaluate for one epoch
@@ -114,7 +114,7 @@ class Trainer(abc.ABC):
                     if epochs_without_improvement >= early_stopping:
                         print(
                             f"\n*** Early stopping triggered at epoch "
-                            f"{epoch+1} after "
+                            f"{epoch + 1} after "
                             f"{epochs_without_improvement} epochs "
                             f"without improvement"
                         )
@@ -130,7 +130,7 @@ class Trainer(abc.ABC):
                 )
                 torch.save(saved_state, checkpoint_filename)
                 print(
-                    f"*** Saved checkpoint {checkpoint_filename} " f"at epoch {epoch+1}"
+                    f"*** Saved checkpoint {checkpoint_filename} " f"at epoch {epoch + 1}"
                 )
 
             if post_epoch_fn:
@@ -191,10 +191,10 @@ class Trainer(abc.ABC):
 
     @staticmethod
     def _foreach_batch(
-        dl: DataLoader,
-        forward_fn: Callable[[Any], BatchResult],
-        verbose=True,
-        max_batches=None,
+            dl: DataLoader,
+            forward_fn: Callable[[Any], BatchResult],
+            verbose=True,
+            max_batches=None,
     ) -> EpochResult:
         """
         Evaluates the given forward-function on batches from the given
@@ -245,7 +245,12 @@ class VAETrainer(Trainer):
         x = x.to(self.device)  # Image batch (N,C,H,W)
         # TODO: Train a VAE on one batch.
         # ====== YOUR CODE: ======
-
+        self.model.train()
+        x_r, mu, log_sigma2 = self.model(x)  # Re-constructed
+        loss, data_loss, kldiv_loss = self.loss_fn(x, x_r, mu, log_sigma2)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         # ========================
 
         return BatchResult(loss.item(), 1 / data_loss.item())
@@ -257,7 +262,10 @@ class VAETrainer(Trainer):
         with torch.no_grad():
             # TODO: Evaluate a VAE on one batch.
             # ====== YOUR CODE: ======
-
+            self.model.eval()
+            self.optimizer.zero_grad()
+            x_r, mu, log_sigma2 = self.model(x)
+            loss, data_loss, kldiv_loss = self.loss_fn(x, x_r, mu, log_sigma2)
             # ========================
 
         return BatchResult(loss.item(), 1 / data_loss.item())
