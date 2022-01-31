@@ -20,18 +20,30 @@ class Discriminator(nn.Module):
         #  You can then use either an affine layer or another conv layer to
         #  flatten the features.
         # ====== YOUR CODE: ======
-        self.in_channels = in_size[0]
-        self.out_channels = 1024
+        modules = []
+        channel_list = [128, 256, 512, 1024]
+        kernel_list = [4] * len(channel_list)
+        stride_list = [2] * (len(channel_list) - 1) + [1]
+        padding_list = [1] * (len(channel_list) - 1) + [0]
 
-        modules = [nn.Conv2d(self.in_channels, 64, 3, 1),
-                   nn.ReLU(),
-                   nn.Conv2d(64, 64, 3, 1),
-                   nn.ReLU(),
-                   nn.Conv2d(64, self.out_channels, 3, 1)]
+        for idx, in_c, out_c, ker, stride, padding in zip(range(len(channel_list)), [in_size[0]] + channel_list,
+                                                          channel_list, kernel_list, stride_list, padding_list):
+            modules.append(nn.Conv2d(in_c, out_c, ker, stride, padding, bias=False))
 
-        self.model = nn.Sequential(*modules)
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model.to(device)
+            if idx < len(channel_list) - 1:
+                modules.append(nn.Dropout2d(0.1))
+                modules.append(nn.BatchNorm2d(out_c))
+                modules.append(nn.LeakyReLU())
+
+        self.feature_extractor = nn.Sequential(*modules)
+        size_list = [1, in_size[0], in_size[1], in_size[2]]
+        temp = torch.rand(size_list)
+        output = self.feature_extractor(temp)
+        output = output.view(1, -1)
+        classifier_module = [nn.Linear(output.shape[1], channel_list[-1]),
+                             nn.Linear(channel_list[-1], channel_list[-1]),
+                             nn.Linear(channel_list[-1], 1)]
+        self.classifier = nn.Sequential(*classifier_module)
         # ========================
 
     def forward(self, x):
@@ -45,13 +57,8 @@ class Discriminator(nn.Module):
         #  with the loss due to improved numerical stability.
         # ====== YOUR CODE: ======
         batch_size = x.shape[0]
-        features = self.model(x)
-        features = features.view(batch_size, -1)
-        num_features = features.shape[1]
-        modules = [nn.Linear(num_features, 1)]
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model_fc = nn.Sequential(*modules).to(device)
-        y = model_fc(features)
+        features = self.feature_extractor(x)
+        y = self.classifier(features.view(batch_size, -1))
         # ========================
         return y
 
@@ -74,22 +81,25 @@ class Generator(nn.Module):
         # ====== YOUR CODE: ======
         # hint (you dont have to use....)
         from .autoencoder import DecoderCNN
+        modules = []
+        channel_list = [1024, 512, 128, 64, out_channels]
+        kernel_list = [featuremap_size] * len(channel_list)
+        stride_list = [2] * len(channel_list)
+        padding_list = [0] + [1] * (len(channel_list) - 1)
         self.featuremap_size = featuremap_size
-        self.out_channels = out_channels
-        modules = [nn.ConvTranspose2d(self.z_dim, 24, self.featuremap_size, padding=0, stride=2),
-                   nn.ReLU(),
-                   nn.ConvTranspose2d(24, 64, self.featuremap_size, padding=1, stride=2),
-                   nn.ReLU(),
-                   nn.ConvTranspose2d(64, 128, self.featuremap_size, padding=1, stride=2),
-                   nn.ReLU(),
-                   nn.ConvTranspose2d(128, 256, self.featuremap_size, padding=1, stride=2),
-                   nn.ReLU(),
-                   nn.ConvTranspose2d(256, self.out_channels, 4, padding=1, stride=2)]
-        self.model = nn.Sequential(*modules)
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model.to(device)
+
+        for idx, in_c, out_c, kernel, stride, padding in zip(range(len(channel_list)), [z_dim] + channel_list,
+                                                             channel_list, kernel_list, stride_list, padding_list):
+            modules.append(nn.ConvTranspose2d(in_c, out_c, kernel, stride, padding, bias=False))
+
+            if idx < len(channel_list) - 1:
+                modules.append((nn.Dropout2d(0.1)))
+                modules.append(nn.ReLU())
+            else:
+                modules.append(nn.Tanh())
+
+        self.generator = nn.Sequential(*modules)
         # ========================
-        return
 
     def sample(self, n, with_grad=False):
         """
@@ -105,9 +115,13 @@ class Generator(nn.Module):
         #  Generate n latent space samples and return their reconstructions.
         #  Don't use a loop.
         # ====== YOUR CODE: ======
-        rand_tensor = torch.rand((n, self.z_dim), device=device, requires_grad=with_grad)  # random tensor
-        # create the samples with forward of self
-        samples = self.forward(rand_tensor).detach() if with_grad is False else self.forward(rand_tensor)
+        z = torch.randn(n, self.z_dim, device=device)
+
+        if with_grad:
+            samples = self.forward(z)
+        else:
+            with torch.no_grad():
+                samples = self.forward(z)
         # ========================
         return samples
 
@@ -121,11 +135,8 @@ class Generator(nn.Module):
         #  Don't forget to make sure the output instances have the same
         #  dynamic range as the original (real) images.
         # ====== YOUR CODE: ======
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        z.to(device)
-        z = z.unsqueeze(-1)
-        z = z.unsqueeze(-1)
-        x = self.model(z)
+        z = z.view(z.shape[0], -1, 1, 1)
+        x = self.generator(z)
         # ========================
         return x
 
@@ -151,21 +162,11 @@ def discriminator_loss_fn(y_data, y_generated, data_label=0, label_noise=0.0):
     #  generated labels.
     #  See pytorch's BCEWithLogitsLoss for a numerically stable implementation.
     # ====== YOUR CODE: ======
-    u_range = 0.5 * label_noise  # Range of the uniform sampling
-
-    # Creating the noisy discriminator targets
-    target_data = data_label * torch.ones_like(y_data) + label_noise * torch.rand_like(y_data) - u_range
-    target_generated = (1 - data_label) * torch.ones_like(y_data) + label_noise * torch.rand_like(y_data) - u_range
-
-    # our criterion
-    criterion = nn.BCEWithLogitsLoss()
-
-    # Target and labels should be on same device
-    target_data.to(y_data.device)
-    target_generated.to(y_generated.device)
-
-    loss_data = criterion(y_data, target_data)
-    loss_generated = criterion(y_generated, target_generated)
+    distribution_error = label_noise * torch.rand_like(y_data) + (data_label - 0.5 * label_noise)
+    classification_error = label_noise * torch.rand_like(y_data) + (1 - data_label - 0.5 * label_noise)
+    loss_module = nn.BCEWithLogitsLoss()
+    loss_data = loss_module(y_data, distribution_error)
+    loss_generated = loss_module(y_generated, classification_error)
     # ========================
     return loss_data + loss_generated
 
@@ -186,10 +187,9 @@ def generator_loss_fn(y_generated, data_label=0):
     #  Think about what you need to compare the input to, in order to
     #  formulate the loss in terms of Binary Cross Entropy.
     # ====== YOUR CODE: ======
-    N = y_generated.shape[0]
-    gen_data_labels = torch.FloatTensor(N).uniform_(data_label)  # All same value
-    criterion = nn.BCEWithLogitsLoss()
-    loss = criterion(y_generated, gen_data_labels)
+    y_compare = torch.ones_like(y_generated) * data_label
+    loss_module = nn.BCEWithLogitsLoss()
+    loss = loss_module(y_generated, y_compare)
     # ========================
     return loss
 
@@ -214,15 +214,12 @@ def train_batch(
     #  2. Calculate discriminator loss
     #  3. Update discriminator parameters
     # ====== YOUR CODE: ======
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    dsc_model.to(device)
-    y_pred = dsc_model(x_data)
-    num_to_sample = y_pred.shape[0]
-    samples = gen_model.sample(num_to_sample, False)
-    generated = dsc_model(samples)
-    dsc_loss = dsc_loss_fn(y_pred, generated)
     dsc_optimizer.zero_grad()
-    dsc_loss.backward(retain_graph=True)
+    n = x_data.shape[0]
+    data = x_data
+    x_discrininator = dsc_model(gen_model.sample(n, False))
+    dsc_loss = dsc_loss_fn(dsc_model(data), x_discrininator)
+    dsc_loss.backward()
     dsc_optimizer.step()
     # ========================
 
@@ -231,15 +228,10 @@ def train_batch(
     #  2. Calculate generator loss
     #  3. Update generator parameters
     # ====== YOUR CODE: ======
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    gen_model.to(device)
-    y_pred = gen_model(x_data)
-    num_to_sample = y_pred.shape[0]
-    samples = gen_model.sample(num_to_sample, True)
-    generated = dsc_model(samples)
-    gen_loss = gen_loss_fn(generated)
     gen_optimizer.zero_grad()
-    gen_loss.backward(retain_graph=True)
+    x_discriminator = dsc_model(gen_model.sample(n, True))
+    gen_loss = gen_loss_fn(x_discriminator)
+    gen_loss.backward()
     gen_optimizer.step()
     # ========================
 
@@ -265,7 +257,6 @@ def save_checkpoint(gen_model, dsc_losses, gen_losses, checkpoint_file):
     # ====== YOUR CODE: ======
     saved_state = dict(gen_model=gen_model.state_dict(), dsc_losses=dsc_losses, gen_losses=gen_losses)
     torch.save(saved_state, checkpoint_file)
-    print(f'*** Saved checkpoint {checkpoint_file} ')
     saved = True
     # ========================
 
