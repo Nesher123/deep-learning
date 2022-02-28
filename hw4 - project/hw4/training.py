@@ -94,31 +94,27 @@ class Trainer(abc.ABC):
             #    simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
             train_result = self.train_epoch(dl_train, verbose=verbose, **kw)
-            test_result = self.test_epoch(dl_test, verbose=verbose, **kw)
-
-            actual_num_epochs += 1
-            train_loss.extend(train_result.losses)
+            current_train_loss = sum(train_result.losses) / len(train_result.losses)
+            train_loss.append(current_train_loss)
             train_acc.append(train_result.accuracy)
-            test_loss.extend(test_result.losses)
+
+            test_result = self.test_epoch(dl_test, verbose=verbose, **kw)
+            current_test_loss = sum(test_result.losses) / len(test_result.losses)
+            test_loss.append(current_test_loss)
             test_acc.append(test_result.accuracy)
 
-            if best_acc is None or test_result.accuracy > best_acc:
+            if best_acc is None:
+                best_acc = test_result.accuracy
+            elif test_result.accuracy > best_acc:
                 best_acc = test_result.accuracy
                 epochs_without_improvement = 0
                 save_checkpoint = True
             else:
                 epochs_without_improvement += 1
 
-                # Stop early if requested
-                if early_stopping is not None:
-                    if epochs_without_improvement >= early_stopping:
-                        print(
-                            f"\n*** Early stopping triggered at epoch "
-                            f"{epoch + 1} after "
-                            f"{epochs_without_improvement} epochs "
-                            f"without improvement"
-                        )
-                        break
+            if early_stopping is not None and epochs_without_improvement >= early_stopping:
+                actual_num_epochs = epoch
+                break
             # ========================
 
             # Save model checkpoint if requested
@@ -246,9 +242,9 @@ class VAETrainer(Trainer):
         # TODO: Train a VAE on one batch.
         # ====== YOUR CODE: ======
         self.model.train()
-        x_r, mu, log_sigma2 = self.model(x)  # Re-constructed
-        loss, data_loss, kldiv_loss = self.loss_fn(x, x_r, mu, log_sigma2)
         self.optimizer.zero_grad()
+        x_reconstruct, mu, log_sigma2 = self.model(x)
+        loss, data_loss, kldiv_loss = self.loss_fn(x, x_reconstruct, mu, log_sigma2)
         loss.backward()
         self.optimizer.step()
         # ========================
@@ -264,8 +260,8 @@ class VAETrainer(Trainer):
             # ====== YOUR CODE: ======
             self.model.eval()
             self.optimizer.zero_grad()
-            x_r, mu, log_sigma2 = self.model(x)
-            loss, data_loss, kldiv_loss = self.loss_fn(x, x_r, mu, log_sigma2)
+            x_reconstruct, mu, log_sigma2 = self.model(x)
+            loss, data_loss, kldiv_loss = self.loss_fn(x, x_reconstruct, mu, log_sigma2)
             # ========================
 
         return BatchResult(loss.item(), 1 / data_loss.item())
