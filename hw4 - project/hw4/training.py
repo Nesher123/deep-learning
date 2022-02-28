@@ -94,23 +94,22 @@ class Trainer(abc.ABC):
             #    simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
             train_result = self.train_epoch(dl_train, verbose=verbose, **kw)
-            current_train_loss = sum(train_result.losses) / len(train_result.losses)
-            train_loss.append(current_train_loss)
-            train_acc.append(train_result.accuracy)
-
             test_result = self.test_epoch(dl_test, verbose=verbose, **kw)
+            current_train_loss = sum(train_result.losses) / len(train_result.losses)
             current_test_loss = sum(test_result.losses) / len(test_result.losses)
+            train_loss.append(current_train_loss)
             test_loss.append(current_test_loss)
+            train_acc.append(train_result.accuracy)
             test_acc.append(test_result.accuracy)
 
             if best_acc is None:
                 best_acc = test_result.accuracy
-            elif test_result.accuracy > best_acc:
+            elif best_acc < test_result.accuracy:
                 best_acc = test_result.accuracy
                 epochs_without_improvement = 0
                 save_checkpoint = True
             else:
-                epochs_without_improvement += 1
+                epochs_without_improvement = epochs_without_improvement + 1
 
             if early_stopping is not None and epochs_without_improvement >= early_stopping:
                 actual_num_epochs = epoch
